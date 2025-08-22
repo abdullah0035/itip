@@ -1,0 +1,96 @@
+/* Font Size Classes - 10px to 60px with 2px gap */
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "poppins";
+}
+
+body {
+  background-color: #EFFCFF;
+}
+
+.primary_btn{
+  width: 100%;
+  padding: 10px;
+  border-radius: 9px;
+  color: var(--white);
+  background: linear-gradient(90deg, var(--primary) 20%, var(--primary-dark) 100%);
+}
+
+
+
+/* _________________pwa settings________________ */
+
+.mainScreen {
+  max-width: 500px;
+  margin: auto;
+  background-color: #fff;
+  padding: 20px 15px;
+}
+.h_100vh {
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+
+.customInputGroup {
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+  height: 55px;
+  border-radius: 8px;
+  border-width: 1px;
+  min-width: 0; /* Add this */
+  width: 100%; /* Ensure full width */
+}
+
+.customInputGroup input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 0 10px;
+  color: var(--black);
+  background: transparent;
+  min-width: 0; /* Add this to allow shrinking */
+}
+.customInputGroup textarea {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 0 10px;
+  color: var(--black);
+  background: transparenrot;
+  min-width: 0; /* Add this to allow shrinking */
+}
+.shadow-sm{
+  box-shadow: 0px 11px 18px 0px #0000000A;
+}
+.QrTabs{
+  background: var(--white);
+  color: var(--primary);
+  padding: 10px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  border: 1px solid var(--border-color);
+  font-family: 'poppins' !important;
+  transition: all 0.3s ease;
+}
+.QrTabs.active{
+  background: var(--primary) !important;
+  color: var(--white) !important;
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+.fundsCard{
+  background-color: #D7F7FF;
+position: relative;
+border-radius: 12px;
+padding: 20px 12px;
+overflow: hidden;
+}
+.fundsCard .bg_circle{
+  position: absolute;
+  bottom: -10px;
+  right: 0;
+}

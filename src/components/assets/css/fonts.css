@@ -1,0 +1,237 @@
+@font-face {
+    font-family: 'outfit';
+    src: url('../../fonts/Outfit/Outfit-Regular.ttf');
+}
+@font-face {
+    font-family: 'outfit_bold';
+    src: url('../../fonts/Outfit/Outfit-Bold.ttf');
+}
+@font-face {
+    font-family: 'outfit_semibold';
+    src: url('../../fonts/Outfit/Outfit-SemiBold.ttf');
+}
+@font-face {
+    font-family: 'outfit_medium';
+    src: url('../../fonts/Outfit/Outfit-Medium.ttf');
+}
+@font-face {
+    font-family: 'outfit_light';
+    src: url('../../fonts/Outfit/Outfit-Light.ttf');
+}
+
+@font-face {
+    font-family: 'poppins';
+    src: url('../../fonts/Poppins/Poppins-Regular.ttf');
+}
+@font-face {
+    font-family: 'poppins_bold';
+    src: url('../../fonts/Poppins/Poppins-Bold.ttf');
+}
+@font-face {
+    font-family: 'poppins_medium';
+    src: url('../../fonts/Poppins/Poppins-Medium.ttf');
+}
+@font-face {
+    font-family: 'poppins_light';
+    src: url('../../fonts/Poppins/Poppins-Light.ttf');
+}
+
+@font-face {
+    font-family: 'dm_sans';
+    src: url('../../fonts/DM_Sans/DMSans-Regular.ttf');
+}
+@font-face {
+    font-family: 'dm_sans_bold';
+    src: url('../../fonts/DM_Sans/DMSans-Bold.ttf');
+}
+@font-face {
+    font-family: 'dm_sans_medium';
+    src: url('../../fonts/DM_Sans/DMSans-Medium.ttf');
+}
+@font-face {
+    font-family: 'dm_sans_light';
+    src: url('../../fonts/DM_Sans/DMSans-Light.ttf');
+}
+
+@font-face {
+    font-family: 'open_sans';
+    src: url('../../fonts/Open_Sans/OpenSans-Regular.ttf');
+}
+@font-face {
+    font-family: 'open_sans_bold';
+    src: url('../../fonts/Open_Sans/OpenSans-Bold.ttf');
+}
+@font-face {
+    font-family: 'open_sans_medium';
+    src: url('../../fonts/Open_Sans/OpenSans-Medium.ttf');
+}
+@font-face {
+    font-family: 'open_sans_light';
+    src: url('../../fonts/Open_Sans/OpenSans-Light.ttf');
+}
+
+@font-face {
+    font-family: 'plus_Jakarta_Sans';
+    src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-Regular.ttf');
+}
+@font-face {
+    font-family: 'plus_Jakarta_Sans_bold';
+    src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-Bold.ttf');
+}
+@font-face {
+    font-family: 'plus_Jakarta_Sans_medium';
+    src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-Medium.ttf');
+}
+@font-face {
+    font-family: 'plus_Jakarta_Sans_light';
+    src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-Light.ttf');
+}
+
+/* Font Family Classes */
+
+/* Outfit Font Family */
+.outfit {
+  font-family: 'outfit';
+}
+
+.outfit_bold {
+  font-family: 'outfit_bold';
+}
+
+.outfit_medium {
+  font-family: 'outfit_medium';
+}
+.outfit_semibold {
+  font-family: 'outfit_semibold';
+}
+
+.outfit_light {
+  font-family: 'outfit_light';
+}
+
+/* Poppins Font Family */
+.poppins {
+  font-family: 'poppins';
+}
+
+.poppins_bold {
+  font-family: 'poppins_bold';
+}
+
+.poppins_medium {
+  font-family: 'poppins_medium';
+}
+
+.poppins_light {
+  font-family: 'poppins_light';
+}
+
+/* DM Sans Font Family */
+.dm_sans {
+  font-family: 'dm_sans';
+}
+
+.dm_sans_bold {
+  font-family: 'dm_sans_bold';
+}
+
+.dm_sans_medium {
+  font-family: 'dm_sans_medium';
+}
+
+.dm_sans_light {
+  font-family: 'dm_sans_light';
+}
+
+/* Open Sans Font Family */
+.open_sans {
+  font-family: 'open_sans';
+}
+
+.open_sans_bold {
+  font-family: 'open_sans_bold';
+}
+
+.open_sans_medium {
+  font-family: 'open_sans_medium';
+}
+
+.open_sans_light {
+  font-family: 'open_sans_light';
+}
+
+/* Plus Jakarta Sans Font Family */
+.plus_Jakarta_Sans {
+  font-family: 'plus_Jakarta_Sans';
+}
+
+.plus_Jakarta_Sans_bold {
+  font-family: 'plus_Jakarta_Sans_bold';
+}
+
+.plus_Jakarta_Sans_medium {
+  font-family: 'plus_Jakarta_Sans_medium';
+}
+
+.plus_Jakarta_Sans_light {
+  font-family: 'plus_Jakarta_Sans_light';
+}
+
+
+/* Desktop/default font sizes */
+.fs_10 { font-size: 10px; }
+.fs_12 { font-size: 12px; }
+.fs_14 { font-size: 14px; }
+.fs_16 { font-size: 16px; }
+.fs_18 { font-size: 18px; }
+.fs_20 { font-size: 20px; }
+.fs_22 { font-size: 22px; }
+.fs_24 { font-size: 24px; }
+.fs_26 { font-size: 26px; }
+.fs_28 { font-size: 28px; }
+.fs_30 { font-size: 30px; }
+.fs_32 { font-size: 32px; }
+.fs_34 { font-size: 34px; }
+.fs_36 { font-size: 36px; }
+.fs_38 { font-size: 38px; }
+.fs_40 { font-size: 40px; }
+.fs_42 { font-size: 42px; }
+.fs_44 { font-size: 44px; }
+.fs_46 { font-size: 46px; }
+.fs_48 { font-size: 48px; }
+.fs_50 { font-size: 50px; }
+.fs_52 { font-size: 52px; }
+.fs_54 { font-size: 54px; }
+.fs_56 { font-size: 56px; }
+.fs_58 { font-size: 58px; }
+.fs_60 { font-size: 60px; }
+
+/* Mobile font sizes - scaled down by ~25% for better mobile experience */
+@media screen and (max-width: 768px) {
+  .fs_10 { font-size: 8px; }
+  .fs_12 { font-size: 9px; }
+  .fs_14 { font-size: 11px; }
+  .fs_16 { font-size: 12px; }
+  .fs_18 { font-size: 14px; }
+  .fs_20 { font-size: 15px; }
+  .fs_22 { font-size: 17px; }
+  .fs_24 { font-size: 18px; }
+  .fs_26 { font-size: 20px; }
+  .fs_28 { font-size: 21px; }
+  .fs_30 { font-size: 23px; }
+  .fs_32 { font-size: 24px; }
+  .fs_34 { font-size: 26px; }
+  .fs_36 { font-size: 27px; }
+  .fs_38 { font-size: 29px; }
+  .fs_40 { font-size: 30px; }
+  .fs_42 { font-size: 32px; }
+  .fs_44 { font-size: 33px; }
+  .fs_46 { font-size: 35px; }
+  .fs_48 { font-size: 36px; }
+  .fs_50 { font-size: 38px; }
+  .fs_52 { font-size: 39px; }
+  .fs_54 { font-size: 41px; }
+  .fs_56 { font-size: 42px; }
+  .fs_58 { font-size: 44px; }
+  .fs_60 { font-size: 45px; }
+}

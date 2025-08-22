@@ -1,0 +1,36 @@
+/* Root Color Variables */
+
+:root {
+  /* Primary */
+  --primary: #147187;
+  --primary-light: #BAEBF7;
+  --primary-dark: #246473;
+  --border-color: #dddde1;
+  /* Gray */
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-600: #4F4F4F;
+  --gray-800: #1f2937;
+  --icon:#B0BABF;
+  /* Status Colors */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #06b6d4;
+
+  /* Basic */
+  --white: #ffffff;
+  --black: #060606;
+}
+
+
+.bg_primary{
+  background-color: var(--primary);
+}
+.bg_primary_light {
+  background-color: var(--primary-light);
+}
+.bg_primary_dark {
+  background-color: var(--primary-dark);
+}
