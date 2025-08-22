@@ -83,6 +83,10 @@
     src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-Medium.ttf');
 }
 @font-face {
+    font-family: 'plus_Jakarta_Sans_semibold';
+    src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-SemiBold.ttf');
+}
+@font-face {
     font-family: 'plus_Jakarta_Sans_light';
     src: url('../../fonts/Plus_Jakarta_Sans/PlusJakartaSans-Light.ttf');
 }
@@ -171,6 +175,9 @@
 
 .plus_Jakarta_Sans_medium {
   font-family: 'plus_Jakarta_Sans_medium';
+}
+.plus_Jakarta_Sans_semibold {
+  font-family: 'plus_Jakarta_Sans_semibold';
 }
 
 .plus_Jakarta_Sans_light {

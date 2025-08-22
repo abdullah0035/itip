@@ -1,4 +1,5 @@
 import Logo from '../assets/logo/logo.png';
+import LogoWhite from '../assets/logo/logoWhite.svg';
 import GreenCheck from '../assets/icons/greenCheck.png';
 import Barcode from '../assets/icons/barcode.png';
 import QrCodeIcon from '../assets/icons/QrCode.svg';
@@ -8,5 +9,6 @@ export {
     GreenCheck,
     Barcode,
     QrCodeIcon,
-    BalanceCardCircle
+    BalanceCardCircle,
+    LogoWhite
 }

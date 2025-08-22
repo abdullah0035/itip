@@ -1,20 +1,21 @@
 // config/layoutConfig.js
 
 import { 
-  RiDashboardLine, 
   RiQrCodeLine, 
-  RiMoneyDollarCircleLine, 
-  RiBarChartLine, 
-  RiWalletLine, 
-  RiSettingsLine,
-  RiGroupLine,
-  RiShoppingBagLine 
+  RiLayoutGridFill,
+  RiFundsFill,
+  RiTimeFill,
+  RiUserFill
 } from '@remixicon/react'
 
 // Routes where dashboard layout (header + sidebar) should be shown
 export const dashboardRoutes = [
   '/dashboard',
   '/qr-codes',
+  '/funds',
+  '/history',
+  '/users',
+  '/account'
 ]
 
 // Auth routes where mainScreen class should be applied
@@ -39,7 +40,7 @@ export const cleanRoutes = [
 export const sidebarItems = [
   { 
     name: 'Dashboard', 
-    icon: RiDashboardLine, 
+    icon: RiLayoutGridFill, 
     href: '/dashboard',
     active: true 
   },
@@ -49,38 +50,20 @@ export const sidebarItems = [
     href: '/qr-codes' 
   },
   { 
-    name: 'Tips', 
-    icon: RiMoneyDollarCircleLine, 
-    href: '/tips',
-    badge: '5',
-    badgeColor: 'blue'
+    name: 'Funds', 
+    icon: RiFundsFill, 
+    href: '/funds',
   },
   { 
-    name: 'Analytics', 
-    icon: RiBarChartLine, 
-    href: '/analytics' 
+    name: 'History', 
+    icon: RiTimeFill, 
+    href: '/history' 
   },
   { 
-    name: 'Earnings', 
-    icon: RiWalletLine, 
-    href: '/earnings' 
+    name: 'Account', 
+    icon: RiUserFill, 
+    href: '/account',
   },
-  { 
-    name: 'Users', 
-    icon: RiGroupLine, 
-    href: '/users',
-    badge: 'Pro'
-  },
-  { 
-    name: 'Products', 
-    icon: RiShoppingBagLine, 
-    href: '/products' 
-  },
-  { 
-    name: 'Settings', 
-    icon: RiSettingsLine, 
-    href: '/settings' 
-  }
 ]
 
 // Helper function to check if current path should show dashboard layout

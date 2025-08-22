@@ -1,62 +1,75 @@
 import React from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { 
-  RiDashboardLine, 
-  RiLayoutGridLine, 
-  RiInboxLine, 
-  RiGroupLine, 
-  RiShoppingBagLine, 
-  RiLoginBoxLine, 
-  RiUserAddLine
+  RiDashboardLine
 } from '@remixicon/react'
+import {  LogoWhite } from '../../../icons/icons'
 
 const Sidebar = ({ 
   isOpen, 
   onClose,
   sidebarItems = [
-    { name: 'Dashboard', icon: RiDashboardLine, href: '#' },
-    { name: 'Kanban', icon: RiLayoutGridLine, href: '#', badge: 'Pro' },
-    { name: 'Inbox', icon: RiInboxLine, href: '#', badge: '3', badgeColor: 'blue' },
-    { name: 'Users', icon: RiGroupLine, href: '#' },
-    { name: 'Products', icon: RiShoppingBagLine, href: '#' },
-    { name: 'Sign In', icon: RiLoginBoxLine, href: '#' },
-    { name: 'Sign Up', icon: RiUserAddLine, href: '#' },
+    { name: 'Dashboard', icon: RiDashboardLine, href: '/' },
   ]
 }) => {
+  const location = useLocation()
 
   return (
     <>
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform bg-white border-r border-gray-200 ${
+        className={`fixed top-0 left-0 z-50 w-64 h-screen pt-5 transition-transform bg-[var(--primary)] border-r border-gray-200 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } sm:translate-x-0`}
       >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white">
+        <div className="h-full pb-4 overflow-y-auto  bg-transparent">
+                      {/* Logo */}
+            <Link to="/" className="flex items-center justify-center pb-8 ms-2 w-full">
+              <img src={LogoWhite} width={80} alt="" />
+            </Link>
           <ul className="space-y-2 font-medium">
-            {sidebarItems.map((item, index) => (
-              <li key={index}>
-                <a
-                  href={item.href}
-                  className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
-                >
-                  <item.icon className="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
-                  <span className="flex-1 ms-3 whitespace-nowrap">{item.name}</span>
-                  
-                  {/* Badges */}
-                  {item.badge && (
-                    <span
-                      className={`inline-flex items-center justify-center px-2 ms-3 text-sm font-medium rounded-full ${
-                        item.badgeColor === 'blue'
-                          ? 'text-blue-800 bg-blue-100 w-3 h-3 p-3'
-                          : 'text-gray-800 bg-gray-100'
-                      }`}
-                    >
-                      {item.badge}
+            {sidebarItems?.map((item, index) => {
+              const isActive = location.pathname === item?.href
+              
+              return (
+                <li key={index}>
+                  <Link
+                    to={item?.href}
+                    className={`flex ps-5 items-center p-2 text-gray-900 group border-white ${
+                      isActive 
+                        ? 'bg-[#5893A2] border-r-4' 
+                        : 'hover:bg-[#5893A2] hover:border-r-4'
+                    }`}
+                  >
+                    <item.icon className={`w-5 h-5 transition duration-75 ${
+                      isActive 
+                        ? 'text-[var(--white)]' 
+                        : 'text-[var(--icon)] group-hover:text-[var(--white)]'
+                    }`} />
+                    <span className={`flex-1 ms-3 whitespace-nowrap ${
+                      isActive 
+                        ? 'text-[var(--white)]' 
+                        : 'text-[#C8C8C8] group-hover:text-[var(--white)]'
+                    }`}>
+                      {item?.name}
                     </span>
-                  )}
-                </a>
-              </li>
-            ))}
+                    
+                    {/* Badges */}
+                    {item?.badge && (
+                      <span
+                        className={`inline-flex items-center justify-center px-2 ms-3 text-sm font-medium rounded-full ${
+                          item.badgeColor === 'blue'
+                            ? 'text-blue-800 bg-blue-100 w-3 h-3 p-3'
+                            : 'text-gray-800 bg-gray-100'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         </div>
       </aside>

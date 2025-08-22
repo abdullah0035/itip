@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { RiMenuLine } from '@remixicon/react'
 
 const Header = ({ onToggleSidebar, user = { name: 'Neil Sims', email: 'neil.sims@itip.com' } }) => {
@@ -9,7 +10,7 @@ const Header = ({ onToggleSidebar, user = { name: 'Neil Sims', email: 'neil.sims
   }
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200">
+    <nav className="fixed top-0 h-[70px] z-40 w-full bg-white border-b border-gray-200">
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-start">
@@ -22,18 +23,6 @@ const Header = ({ onToggleSidebar, user = { name: 'Neil Sims', email: 'neil.sims
               <span className="sr-only">Open sidebar</span>
               <RiMenuLine className="w-6 h-6" />
             </button>
-
-            {/* Logo */}
-            <a href="#" className="flex ms-2 md:me-24">
-              <img 
-                src="https://flowbite.com/docs/images/logo.svg" 
-                className="h-8 me-3" 
-                alt="iTIP Logo" 
-              />
-              <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
-                iTIP
-              </span>
-            </a>
           </div>
 
           {/* User menu */}
@@ -49,7 +38,7 @@ const Header = ({ onToggleSidebar, user = { name: 'Neil Sims', email: 'neil.sims
                 <img 
                   className="w-8 h-8 rounded-full" 
                   src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" 
-                  alt="user photo" 
+                  alt="userImage" 
                 />
               </button>
 
@@ -64,36 +53,36 @@ const Header = ({ onToggleSidebar, user = { name: 'Neil Sims', email: 'neil.sims
                   </div>
                   <ul className="py-1">
                     <li>
-                      <a
-                        href="#"
+                      <Link
+                        to="/dashboard"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Dashboard
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
-                        href="#"
+                      <Link
+                        to="/settings"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Settings
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
-                        href="#"
+                      <Link
+                        to="/earnings"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Earnings
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
-                        href="#"
+                      <Link
+                        to="/signout"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Sign out
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>

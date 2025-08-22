@@ -3,20 +3,22 @@ import React from 'react'
 const Textarea = ({
   labels,
   placeholder = "",
-  value,
-  onChange,
+  value = "",
+  onChange = null,
   rows = 4,
   marginTop = "0px",
   marginBottom = "10px",
   disabled = false,
   maxLength,
   showCharCount = false,
-  className = ""
+  className = "",
+  name = ""
 }) => {
 
   const handleChange = (e) => {
-    if (onChange) {
-      onChange(e)
+    if (onChange && typeof onChange === 'function') {
+      // Return value and field name like the Input component
+      onChange(e.target.value, name || labels);
     }
   }
 
@@ -37,6 +39,7 @@ const Textarea = ({
           disabled={disabled}
           rows={rows}
           maxLength={maxLength}
+          name={name || labels}
           className="customInput fs_16 flex-1 resize-none py-2 min-h-[100px]"
           style={{ minHeight: `${rows * 24}px` }}
         />

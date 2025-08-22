@@ -13,6 +13,8 @@ import Home from '../pages/home/home'
 import Dashboard from '../pages/dashboard/dashboard'
 import QrCode from '../pages/dashboard/qrCode'
 import Funds from '../pages/dashboard/funds'
+import History from '../pages/dashboard/history'
+import Account from '../pages/dashboard/account'
 
 const Routing = () => {
   return (
@@ -29,9 +31,11 @@ const Routing = () => {
           <Route path='/success' element={<SuccessScreen />} />
           <Route path='/qr-setup' element={<QRCodeSetup />} />
           <Route path='/home' element={<Home />} />
-          <Route path='/dashboard' element={<Funds />} />
+          <Route path='/dashboard' element={<History />} />
           <Route path='/qr-codes' element={<QrCode />} />
-          {/* <Route path='/funds' element={<Funds />} /> */}
+          <Route path='/funds' element={<Funds />} />
+          <Route path='/history' element={<History />} />
+          <Route path='/account' element={<Account />} />
       </Routes>
     </>
   )

@@ -1,7 +1,17 @@
-import {  RiEyeOffFill } from '@remixicon/react';
+import { RiEyeOffFill } from '@remixicon/react';
 import React, { useState } from 'react'
 
-const Input = ({labels,placeholder,icon="",type='text',marginTop="0px", marginBottom='10px'}) => {
+const Input = ({ 
+    labels, 
+    placeholder, 
+    icon = "", 
+    type = 'text', 
+    marginTop = "0px", 
+    marginBottom = '10px',
+    onChange = null,
+    value = "",
+    name = ""
+}) => {
     const [showPassword, setShowPassword] = useState(false);
     
     // Determine if this is a password field with an icon
@@ -15,6 +25,13 @@ const Input = ({labels,placeholder,icon="",type='text',marginTop="0px", marginBo
     // Determine the actual input type
     const inputType = isPasswordField && showPassword ? 'text' : type;
     
+    // Handle input change
+    const handleInputChange = (e) => {
+        if (onChange && typeof onChange === 'function') {
+            onChange(e.target.value, name || labels);
+        }
+    };
+    
     // Determine which icon to show
     const getIcon = () => {
         if (!isPasswordField) {
@@ -27,7 +44,14 @@ const Input = ({labels,placeholder,icon="",type='text',marginTop="0px", marginBo
         <div style={{ marginTop, marginBottom }}>
             <label htmlFor="" className='poppins fs_20'>{labels}</label>
             <div className='customInputGroup poppins mt-3'>
-                <input type={inputType} className="customInput fs_16" placeholder={placeholder} />
+                <input 
+                    type={inputType} 
+                    className="customInput fs_16" 
+                    placeholder={placeholder}
+                    value={value}
+                    onChange={handleInputChange}
+                    name={name || labels}
+                />
                 {icon && (
                     <span 
                         onClick={isPasswordField ? togglePasswordVisibility : undefined}
