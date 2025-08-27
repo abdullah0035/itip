@@ -63,7 +63,7 @@ const QrCodeCard = ({
 };
 
 const QrCode = () => {
-    const qrCodesLength = 2;
+    const qrCodesLength = 0;
     const [selectedType, setSelectedType] = useState('all');
     return (
         <div className="p-6 space-y-6">

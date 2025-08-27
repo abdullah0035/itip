@@ -22,7 +22,7 @@ const Sidebar = ({
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } sm:translate-x-0`}
       >
-        <div className="h-full pb-4 overflow-y-auto  bg-transparent">
+        <div className="h-full pb-4 overflow-hidden  bg-transparent">
                       {/* Logo */}
             <Link to="/" className="flex items-center justify-center pb-8 ms-2 w-full">
               <img src={LogoWhite} width={80} alt="" />

@@ -1,7 +1,7 @@
 import axios from "axios"
 
-export const baseURL = 'https://7tracking.com/hang/api.php'
-export const ImageURL = 'https://7tracking.com/panache/images/'
+export const baseURL = 'http://localhost/tip/api.php'
+export const ImageURL = 'http://localhost/tip/api.php'
 
 // export const baseURL = 'https://cdn.utecho.com:5999/'
 // export const ImageURL = 'https://cdn.utecho.com:5999'

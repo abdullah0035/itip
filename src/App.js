@@ -1,6 +1,7 @@
 import { ToastContainer } from 'react-toastify'
 import { BrowserRouter } from 'react-router-dom'
 import { Suspense } from 'react'
+import { Provider } from 'react-redux' // Add this import
 import './App.css'
 import './components/assets/css/color.css'
 import './components/assets/css/style.css'
@@ -10,6 +11,7 @@ import Header from './components/pages/dashboard/dashboardComponent/header'
 import Sidebar from './components/pages/dashboard/dashboardComponent/sidebar'
 import { useLayout } from './utils/hooks/useLayout'
 import { sidebarItems } from './utils/config/layoutConfig'
+import { store } from './components/redux/store'
 
 // Loading component
 const LoadingSpinner = () => (
@@ -30,7 +32,6 @@ const LayoutWrapper = () => {
     closeSidebar,
     logout
   } = useLayout()
-
 
   return (
     <div className='min-h-screen'>
@@ -82,14 +83,16 @@ const LayoutWrapper = () => {
 
 function App () {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      {/* Remove mainScreen class from here - it's now conditional */}
-      <main className='h_100vh'>
-        <BrowserRouter>
-          <LayoutWrapper />
-        </BrowserRouter>
-      </main>
-    </Suspense>
+    <Provider store={store}> {/* Wrap everything with Redux Provider */}
+      <Suspense fallback={<LoadingSpinner />}>
+        {/* Remove mainScreen class from here - it's now conditional */}
+        <main className='h_100vh'>
+          <BrowserRouter>
+            <LayoutWrapper />
+          </BrowserRouter>
+        </main>
+      </Suspense>
+    </Provider>
   )
 }
 

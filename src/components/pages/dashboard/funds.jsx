@@ -203,7 +203,7 @@ const Funds = () => {
                     </div>
 
                     {/* Payout Frequency */}
-                    <div className="flex items-center gap-[100px]">
+                    <div className="flex items-center sm:gap-[100px] gap-[30px]">
                         <div className="flex items-center gap-3">
                             <div className="relative">
                                 <input
@@ -227,7 +227,7 @@ const Funds = () => {
                                             <RiCheckLine className="w-3 h-3 text-white" />
                                         )}
                                     </div>
-                                    <span className="ml-3 fs_24 text-[#969696] outfit_medium">Auto Weekly</span>
+                                    <span className="ml-3 fs_24 text-[#969696] outfit_medium whitespace-nowrap">Auto Weekly</span>
                                 </label>
                             </div>
                         </div>
@@ -255,7 +255,7 @@ const Funds = () => {
                                             <RiCheckLine className="w-3 h-3 text-white" />
                                         )}
                                     </div>
-                                    <span className="ml-3 fs_24 text-[#969696] outfit_medium">Auto Month</span>
+                                    <span className="ml-3 fs_24 text-[#969696] outfit_medium whitespace-nowrap">Auto Month</span>
                                 </label>
                             </div>
                         </div>

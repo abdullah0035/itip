@@ -6,8 +6,24 @@ import Select from '../../../utils/select'
 import { Logo } from '../../icons/icons'
 
 const Signup = () => {
-  const [selectedCity, setSelectedCity] = useState(null)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    country: '',
+    city: null
+  })
+  
+  // Error state
+  const [errors, setErrors] = useState({})
+  
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false)
+
   // City options
   const cities = [
     { id: 1, name: 'New York' },
@@ -27,13 +43,67 @@ const Signup = () => {
     { id: 15, name: 'Charlotte' }
   ]
 
-  const handleCityChange = (city) => {
-    setSelectedCity(city)
-    console.log('Selected city:', city) // You can handle the selected city here
+  // Handle input changes
+  const handleInputChange = (value, fieldName) => {
+    let field = fieldName.toLowerCase().replace(' ', '').replace('address', '')
+    
+    // Handle field name mapping
+    if (field === 'firstname') field = 'firstName'
+    if (field === 'lastname') field = 'lastName'
+    if (field === 'email') field = 'email'
+    
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }))
+    }
   }
 
-  const handleSubmit = () => {
+  // Handle city selection
+  const handleCityChange = (city) => {
+    setFormData(prev => ({
+      ...prev,
+      city: city
+    }))
+    
+    // Clear city error
+    if (errors.city) {
+      setErrors(prev => ({
+        ...prev,
+        city: ''
+      }))
+    }
+  }
+
+  // Validate form using FormValidator
+  const validateForm = () => {
+    const newErrors = {}
+    
+    // City validation
+    if (!formData.city) {
+      newErrors.city = 'City is required'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e?.preventDefault()
     navigate('/success');
+    if (!validateForm()) {
+      return
+    }
+    
+    setIsLoading(true)
   }
 
   return (
@@ -44,35 +114,110 @@ const Signup = () => {
         <h1 className='fs_36 outfit_medium'>Sign Up</h1>
         <h2 className='outfit mb-10 fs_20'>Sign Up to your account</h2>
         
-        {/* First Name and Last Name Row */}
-        <div className='grid grid-cols-2 gap-4 mb-4'>
-          <div className=''>
-            <Input labels={'First Name'} type={'text'} placeholder={'First Name'} icon={""} />
+        <form onSubmit={handleSubmit}>
+          {/* First Name and Last Name Row */}
+          <div className='grid grid-cols-2 gap-4 mb-4'>
+            <div>
+              <Input 
+                labels='First Name' 
+                type='text' 
+                placeholder='First Name' 
+                icon=""
+                onChange={handleInputChange}
+                value={formData.firstName}
+                name="firstName"
+              />
+              {errors.firstName && (
+                <p className="text-red-500 fs_12 mt-1">{errors.firstName}</p>
+              )}
+            </div>
+            <div>
+              <Input 
+                labels='Last Name' 
+                type='text' 
+                placeholder='Last Name' 
+                icon=""
+                onChange={handleInputChange}
+                value={formData.lastName}
+                name="lastName"
+              />
+              {errors.lastName && (
+                <p className="text-red-500 fs_12 mt-1">{errors.lastName}</p>
+              )}
+            </div>
           </div>
-          <div className=''>
-            <Input labels={'Last Name'} type={'text'} placeholder={'Last Name'} icon={""} />
-          </div>
-        </div>
 
-        <Input labels={'Email Address'} type={'email'} placeholder={'Your Email Address'} icon={""} />
-        <Input labels={'Password'} type={'password'} placeholder={'Password'} icon={<RiEyeFill className='text-[var(--icon)] fs_16'/>} />
-        <Input labels={'Country'} type={'text'} placeholder={'Country'} icon={""} />
-        
-        {/* City Dropdown */}
-        <Select
-          labels={'City'}
-          options={cities}
-          placeholder={'Select City'}
-          value={selectedCity}
-          onChange={handleCityChange}
-          displayKey={'name'}
-          valueKey={'id'}
-          marginBottom={'20px'}
-        />
+          <Input 
+            labels='Email Address' 
+            type='email' 
+            placeholder='Your Email Address' 
+            icon=""
+            onChange={handleInputChange}
+            value={formData.email}
+            name="email"
+          />
+          {errors.email && (
+            <p className="text-red-500 fs_14 mt-1 mb-3">{errors.email}</p>
+          )}
+          
+          <Input 
+            labels='Password' 
+            type='password' 
+            placeholder='Password' 
+            icon={<RiEyeFill className='text-[var(--icon)] fs_16'/>}
+            onChange={handleInputChange}
+            value={formData.password}
+            name="password"
+          />
+          {errors.password && (
+            <p className="text-red-500 fs_14 mt-1 mb-3">{errors.password}</p>
+          )}
+          
+          <Input 
+            labels='Country' 
+            type='text' 
+            placeholder='Country' 
+            icon=""
+            onChange={handleInputChange}
+            value={formData.country}
+            name="country"
+          />
+          {errors.country && (
+            <p className="text-red-500 fs_14 mt-1 mb-3">{errors.country}</p>
+          )}
+          
+          {/* City Dropdown */}
+          <Select
+            labels='City'
+            options={cities}
+            placeholder='Select City'
+            value={formData.city}
+            onChange={handleCityChange}
+            displayKey='name'
+            valueKey='id'
+            marginBottom='20px'
+          />
+          {errors.city && (
+            <p className="text-red-500 fs_14 mt-1 mb-3">{errors.city}</p>
+          )}
 
-        <button className='primary_btn mt-4' onClick={()=>handleSubmit()}>Sign Up</button>
+          {errors.submit && (
+            <p className="text-red-500 fs_14 mt-4 text-center">{errors.submit}</p>
+          )}
 
-        <span className='block poppins_medium fs_14 text-center mt-10'>I already have an account? <Link to={'/'} className='text-[var(--primary)]'>Sign In</Link></span>
+          <button 
+            type="submit"
+            className={`primary_btn mt-4 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
+          </button>
+        </form>
+
+        <span className='block poppins_medium fs_14 text-center mt-10'>
+          I already have an account? 
+          <Link to={'/'} className='text-[var(--primary)]'> Sign In</Link>
+        </span>
       </div>
     </>
   )

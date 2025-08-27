@@ -31,7 +31,7 @@ const Routing = () => {
           <Route path='/success' element={<SuccessScreen />} />
           <Route path='/qr-setup' element={<QRCodeSetup />} />
           <Route path='/home' element={<Home />} />
-          <Route path='/dashboard' element={<History />} />
+          <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/qr-codes' element={<QrCode />} />
           <Route path='/funds' element={<Funds />} />
           <Route path='/history' element={<History />} />
