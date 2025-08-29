@@ -10,7 +10,8 @@ const Input = ({
     marginBottom = '10px',
     onChange = null,
     value = "",
-    name = ""
+    name = "",
+    readonly = false,
 }) => {
     const [showPassword, setShowPassword] = useState(false);
     
@@ -42,7 +43,7 @@ const Input = ({
     
     return (
         <div style={{ marginTop, marginBottom }}>
-            <label htmlFor="" className='poppins fs_20'>{labels}</label>
+            <label htmlFor="" className='poppins fs_18'>{labels}</label>
             <div className='customInputGroup poppins mt-3'>
                 <input 
                     type={inputType} 
@@ -51,6 +52,7 @@ const Input = ({
                     value={value}
                     onChange={handleInputChange}
                     name={name || labels}
+                    readOnly={readonly}
                 />
                 {icon && (
                     <span 

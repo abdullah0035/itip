@@ -4,16 +4,26 @@ import Input from '../../../utils/input'
 import RadioGroup from '../../../utils/radioGroup'
 import Textarea from '../../../utils/textarea'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { decryptData } from '../../../utils/api/encrypted'
+import ApiFunction from '../../../utils/api/apiFuntions'
+import { toast } from 'react-toastify'
+import { setLogout } from '../../redux/loginForm'
 
 const QRCodeSetup = ({ onGenerateQR }) => {
   const navigate = useNavigate()
+  const { post } = ApiFunction()
+  const dispatch = useDispatch();
+  // Get encrypted token from Redux store
+  const encryptedToken = useSelector(state => state?.auth?.token)
+  const token = decryptData(encryptedToken)
   
   // Form state
   const [formData, setFormData] = useState({
-    tipType: 'fixed', // 'fixed' or 'no-amount'
-    tipAmount: '50',
-    title: 'Evening Shift',
-    description: "I've been driving for 8 hours today"
+    tipType: 'fixed', // 'fixed' or 'no_amount'
+    tipAmount: '',
+    title: '',
+    description: ""
   })
   
   // Error state
@@ -24,7 +34,7 @@ const QRCodeSetup = ({ onGenerateQR }) => {
 
   const tipTypeOptions = [
     { label: 'Fixed Amount', value: 'fixed' },
-    { label: 'No Amount', value: 'no-amount' }
+    { label: 'No Amount', value: 'no_amount' }
   ]
 
   // Handle tip type change
@@ -32,11 +42,11 @@ const QRCodeSetup = ({ onGenerateQR }) => {
     setFormData(prev => ({
       ...prev,
       tipType: type,
-      tipAmount: type === 'no-amount' ? '' : prev.tipAmount || '50'
+      tipAmount: type === 'no_amount' ? '' : prev.tipAmount || '50'
     }))
     
-    // Clear amount error when switching to no-amount
-    if (type === 'no-amount' && errors.tipAmount) {
+    // Clear amount error when switching to no_amount
+    if (type === 'no_amount' && errors.tipAmount) {
       setErrors(prev => ({
         ...prev,
         tipAmount: ''
@@ -121,7 +131,7 @@ const QRCodeSetup = ({ onGenerateQR }) => {
     return Object.keys(newErrors).length === 0
   }
 
-  // Handle form submission
+  // Handle form submission with real API integration
   const handleGenerateQR = async (e) => {
     e?.preventDefault()
     
@@ -129,52 +139,93 @@ const QRCodeSetup = ({ onGenerateQR }) => {
       return
     }
     
+    // Check if user is authenticated
+    if (!token) {
+      toast.error('Authentication required. Please log in again.')
+      dispatch(setLogout())
+      navigate('/')
+      return
+    }
+    
+    // Prepare payload for API
+    const payload = {
+      tipType: formData.tipType,
+      tipAmount: formData.tipType === 'fixed' ? parseFloat(formData.tipAmount) : 0,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      token: token,
+      action: 'generateQR'
+    }
+    
     setIsLoading(true)
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      const qrData = {
-        tipType: formData.tipType,
-        tipAmount: formData.tipType === 'fixed' ? parseFloat(formData.tipAmount) : null,
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        createdAt: new Date().toISOString(),
-        id: Date.now().toString() // Simple ID generation for demo
-      }
+    await post('', payload)
+      .then((res) => {
+        setIsLoading(false)
+        
+        if (res?.status === 'success') {
+          const qrData = {
+            ...res.qr_data,
+            tipType: formData.tipType,
+            tipAmount: formData.tipType === 'fixed' ? parseFloat(formData?.tipAmount) : null,
+            title: formData.title.trim(),
+            description: formData.description.trim(),
+            createdAt: new Date().toISOString()
+          }
 
-      console.log('Generating QR Code with data:', qrData)
-      
-      // Here you would typically save the QR data to your backend
-      // const response = await createQRCode(qrData)
-      
-      // Store QR data for the home page
-      sessionStorage.setItem('qrData', JSON.stringify(qrData))
-      
-      // Call onGenerateQR if provided
-      if (onGenerateQR) {
-        onGenerateQR(qrData)
-      }
-      
-      // Navigate to home page to display QR code
-      navigate('/home')
-      
-    } catch (error) {
-      console.error('QR Generation error:', error)
-      setErrors({
-        submit: error.message || 'Failed to generate QR code. Please try again.'
+          console.log('QR Code generated successfully:', qrData)
+          
+          // Call onGenerateQR if provided
+          if (onGenerateQR) {
+            onGenerateQR(qrData)
+          }
+          
+          // Show success message
+          toast.success(res?.message || 'QR Code generated successfully!')
+          
+          // Navigate to home page to display QR code
+          navigate('/home')
+          
+        } else {
+          // Handle API error response
+          const errorMessage = res?.message || 'Failed to generate QR code. Please try again.'
+          setErrors({
+            submit: errorMessage
+          })
+          toast.error(errorMessage)
+        }
       })
-    } finally {
-      setIsLoading(false)
-    }
+      .catch((error) => {
+        setIsLoading(false)
+        console.error('QR Generation error:', error)
+        
+        let errorMessage = 'Failed to generate QR code. Please try again.'
+        
+        // Handle specific error cases
+        if (error.message) {
+          errorMessage = error.message
+        } else if (error?.response?.data?.message) {
+          errorMessage = error?.response?.data?.message
+        }
+        
+        setErrors({
+          submit: errorMessage
+        })
+        toast.error(errorMessage)
+        
+        // If unauthorized, redirect to login
+        if (error?.response?.status === 403 || errorMessage?.includes('Unauthorized')) {
+          toast.error('Session expired. Please log in again.')
+          navigate('/')
+        }
+      })
   }
 
   const isFormValid = () => {
     return (
-      formData.title.trim() && 
-      formData.description.trim() && 
-      (formData.tipType === 'no-amount' || formData.tipAmount.trim())
+      formData?.title.trim() && 
+      formData?.description.trim() && 
+      (formData?.tipType === 'no_amount' || formData?.tipAmount.trim())
     )
   }
 
@@ -193,8 +244,8 @@ const QRCodeSetup = ({ onGenerateQR }) => {
           <h1 className="fs_40 outfit_medium text-black mb-2">Setup your first QR Code</h1>
 
           {/* Subtitle */}
-          <p className="outfit fs_20 text-gray-600">
-            Welcome to iTIP! Now let's set up your first QR Code to start receiving tips.
+          <p className="outfit fs_20 text-center text-gray-600">
+            Welcome to iTIP! Now let's set up your QR Code to start receiving tips.
           </p>
           <hr className='my-8 text-[#E6E6E6]' />
           
@@ -203,21 +254,21 @@ const QRCodeSetup = ({ onGenerateQR }) => {
             <RadioGroup
               label="Tip Type"
               options={tipTypeOptions}
-              value={formData.tipType}
+              value={formData?.tipType}
               onChange={handleTipTypeChange}
               name="tipType"
               marginBottom="24px"
             />
 
             {/* Tip Amount (only show if Fixed Amount selected) */}
-            {formData.tipType === 'fixed' && (
+            {formData?.tipType === 'fixed' && (
               <div className="mb-6">
                 <label className="block poppins fs_16 text-black mb-3">Tip Amount</label>
                 <div className="customInputGroup">
                   <span className="text-gray-500 fs_16">$</span>
                   <input
                     type="number"
-                    value={formData.tipAmount}
+                    value={formData?.tipAmount}
                     onChange={handleTipAmountChange}
                     placeholder="0"
                     className="customInput fs_16 flex-1 ml-2"
@@ -239,10 +290,11 @@ const QRCodeSetup = ({ onGenerateQR }) => {
                 labels="Title"
                 type="text"
                 placeholder="Enter title"
-                value={formData.title}
+                value={formData?.title}
                 onChange={handleInputChange}
                 name="title"
                 marginBottom="0px"
+                disabled={isLoading}
               />
               {errors.title && (
                 <p className="text-red-500 fs_14 mt-1">{errors.title}</p>
@@ -253,35 +305,43 @@ const QRCodeSetup = ({ onGenerateQR }) => {
             <Textarea
               labels="Description"
               placeholder="Enter description"
-              value={formData.description}
+              value={formData?.description}
               onChange={handleInputChange}
               name="description"
               rows={4}
               marginBottom="16px"
               maxLength={500}
               showCharCount={true}
+              disabled={isLoading}
             />
-            {errors.description && (
-              <p className="text-red-500 fs_14 mt-1 mb-4">{errors.description}</p>
+            {errors?.description && (
+              <p className="text-red-500 fs_14 mt-1 mb-4">{errors?.description}</p>
             )}
             
             {/* Submit Error */}
-            {errors.submit && (
-              <p className="text-red-500 fs_14 mb-4 text-center">{errors.submit}</p>
+            {errors?.submit && (
+              <p className="text-red-500 fs_14 mb-4 text-center">{errors?.submit}</p>
             )}
 
             {/* Generate QR Code Button */}
             <button
               type="submit"
-              disabled={!isFormValid() || isLoading}
+              disabled={!isFormValid() || isLoading || !token}
               className={`primary_btn w-full transition-all ${
-                !isFormValid() || isLoading
+                !isFormValid() || isLoading || !token
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-[var(--primary-dark)]'
               }`}
             >
               {isLoading ? 'Generating QR Code...' : 'Generate QR Code'}
             </button>
+            
+            {/* Authentication warning */}
+            {!token && (
+              <p className="text-orange-500 fs_12 mt-2 text-center">
+                Please ensure you're logged in to generate QR codes
+              </p>
+            )}
           </form>
         </div>
       </div>

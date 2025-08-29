@@ -1,78 +1,105 @@
-import React, { useState, useMemo } from 'react'
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useMemo, useEffect } from 'react'
 import { RiEyeLine, RiSearchLine, RiArrowUpLine, RiArrowDownLine } from '@remixicon/react'
 import { Barcode } from '../../icons/icons'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { decryptData } from '../../../utils/api/encrypted'
+import ApiFunction from '../../../utils/api/apiFuntions'
+import { toast } from 'react-toastify'
+import { setLogout } from '../../redux/loginForm'
 
 const Dashboard = () => {
-    // Sample data for recent tips
-    const [recentTips] = useState([
-        {
-            id: 1,
-            no: '01',
-            date: 'June 17, 2025',
-            description: 'SEVIS Payment',
-            amount: -220.00,
-            status: 'Completed',
-            action: 'View Receipt'
-        },
-        {
-            id: 2,
-            no: '02',
-            date: 'June 16, 2025',
-            description: 'Fund Wallet - NGN ₦150K',
-            amount: 500.00,
-            status: 'Completed',
-            action: 'View Receipt'
-        },
-        {
-            id: 3,
-            no: '03',
-            date: 'June 14, 2025',
-            description: 'Card Settings Updated',
-            amount: null,
-            status: 'Pending',
-            action: null
-        },
-        {
-            id: 4,
-            no: '04',
-            date: 'June 13, 2025',
-            description: 'Restaurant Tip',
-            amount: 15.50,
-            status: 'Completed',
-            action: 'View Receipt'
-        },
-        {
-            id: 5,
-            no: '05',
-            date: 'June 12, 2025',
-            description: 'Coffee Shop Tip',
-            amount: 5.25,
-            status: 'Completed',
-            action: 'View Receipt'
-        }
-    ])
+    const navigate = useNavigate()
+    const { get } = ApiFunction()
+    
+    // Get encrypted token from Redux store
+    const encryptedToken = useSelector(state => state?.auth?.token)
+    const token = decryptData(encryptedToken)
+
+    // State management
+    const [dashboardData, setDashboardData] = useState(null)
+    const [recentTips, setRecentTips] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState('')
 
     // Table state
     const [searchTerm, setSearchTerm] = useState('')
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage] = useState(10)
+const dispatch = useDispatch();
+    // Fetch dashboard data from API
+    const fetchDashboardData = async () => {
+        if (!token) {
+            setError('Authentication required')
+            setIsLoading(false)
+            navigate('/')
+            return
+        }
+
+        try {
+            setIsLoading(true)
+            setError('')
+
+            const response = await get('', {
+                action: 'getDashboard',
+                token: token
+            })
+            
+            if (response?.status === 'success') {
+                setDashboardData(response?.dashboard_data)
+                setRecentTips(response?.dashboard_data?.recent_tips || [])
+            } else {
+                setError(response?.message || 'Failed to fetch dashboard data')
+                toast.error(response?.message || 'Failed to fetch dashboard data')
+            }
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error)
+            const errorMessage = error?.message || 'Failed to load dashboard data'
+            setError(errorMessage)
+            toast.error(errorMessage)
+            
+            // If unauthorized, redirect to login
+            if (error?.response?.status === 403 || errorMessage?.includes('Unauthorized')) {
+                toast.error('Session expired. Please log in again.')
+                navigate('/')
+                dispatch(setLogout());
+            }
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Fetch data when component mounts
+    useEffect(() => {
+        fetchDashboardData()
+    }, [token])
 
     // Filter and sort data
     const filteredAndSortedData = useMemo(() => {
-        let filtered = recentTips.filter(tip =>
-            tip.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            tip.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            tip.date.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        let filtered = recentTips?.filter(tip =>
+            tip?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+            tip?.status?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+            tip?.date?.toLowerCase()?.includes(searchTerm?.toLowerCase())
+        ) || []
 
-        if (sortConfig.key) {
+        if (sortConfig?.key) {
             filtered.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'asc' ? -1 : 1
+                let aValue = a?.[sortConfig?.key]
+                let bValue = b?.[sortConfig?.key]
+                
+                // Handle amount comparison
+                if (sortConfig?.key === 'amount') {
+                    aValue = parseFloat(String(aValue)?.replace(/[^0-9.-]/g, '')) || 0
+                    bValue = parseFloat(String(bValue)?.replace(/[^0-9.-]/g, '')) || 0
                 }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'asc' ? 1 : -1
+                
+                if (aValue < bValue) {
+                    return sortConfig?.direction === 'asc' ? -1 : 1
+                }
+                if (aValue > bValue) {
+                    return sortConfig?.direction === 'asc' ? 1 : -1
                 }
                 return 0
             })
@@ -82,9 +109,9 @@ const Dashboard = () => {
     }, [recentTips, searchTerm, sortConfig])
 
     // Pagination
-    const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage)
+    const totalPages = Math.ceil(filteredAndSortedData?.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
-    const paginatedData = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage)
+    const paginatedData = filteredAndSortedData?.slice(startIndex, startIndex + itemsPerPage) || []
 
     // Sorting function
     const handleSort = (key) => {
@@ -107,14 +134,16 @@ const Dashboard = () => {
     }
 
     const formatAmount = (amount) => {
-        if (amount === null) return '---'
-        const formatted = Math.abs(amount).toFixed(2)
-        return amount >= 0 ? `+$${formatted}` : `-$${formatted}`
+        if (amount === null || amount === undefined) return '---'
+        const numAmount = parseFloat(String(amount).replace(/[^0-9.-]/g, ''))
+        if (isNaN(numAmount)) return '---'
+        return amount.startsWith && amount.startsWith('+') ? amount : `+${amount}`
     }
 
     const getAmountClass = (amount) => {
-        if (amount === null) return 'text-gray-400'
-        return amount >= 0 ? 'text-green-600' : 'text-red-600'
+        if (amount === null || amount === undefined) return 'text-gray-400'
+        if (String(amount).includes('-')) return 'text-red-600'
+        return 'text-green-600'
     }
 
     const getActionButton = (action, status) => {
@@ -138,6 +167,110 @@ const Dashboard = () => {
             <RiArrowDownLine className="w-4 h-4" />
     }
 
+    // Skeleton Loader Components
+    const StatCardSkeleton = () => (
+        <div className="flex-1 bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-between animate-pulse">
+            <div>
+                <div className="h-5 bg-gray-200 rounded mb-2"></div>
+                <div className="h-9 bg-gray-200 rounded mb-4"></div>
+            </div>
+            <div className="h-8 bg-gray-200 rounded"></div>
+        </div>
+    )
+
+    const QRSectionSkeleton = () => (
+        <div className="w-full lg:w-2/5">
+            <div className="bg-white rounded-xl p-6 shadow-sm border animate-pulse">
+                <div className="h-7 bg-gray-200 rounded mb-4"></div>
+                <div className='flex justify-between'>
+                    <div className='justify-end flex items-end'>
+                        <div className="w-[100px] h-8 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="flex justify-center">
+                        <div className="w-28 h-28 bg-gray-200 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+
+    const TableSkeleton = () => (
+        <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+                    <div className="h-10 bg-gray-200 rounded w-64 animate-pulse"></div>
+                </div>
+            </div>
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            {['No', 'Date', 'Description', 'Amount', 'Status', 'Action'].map((header) => (
+                                <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {header}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {[...Array(5)].map((_, index) => (
+                            <tr key={index} className="animate-pulse">
+                                <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-8"></div></td>
+                                <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-24"></div></td>
+                                <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-32"></div></td>
+                                <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded w-16"></div></td>
+                                <td className="px-6 py-4"><div className="h-6 bg-gray-200 rounded w-20"></div></td>
+                                <td className="px-6 py-4"><div className="h-6 bg-gray-200 rounded w-24"></div></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    )
+
+    if (isLoading) {
+        return (
+            <div className="p-6 space-y-6">
+                {/* Dashboard Header */}
+                <h1 className="fs_32 outfit_medium text-[#2C2C2C]">Dashboard</h1>
+
+                {/* Top Section - QR Code and Stats Skeleton */}
+                <div className="flex flex-col lg:flex-row gap-2">
+                    <QRSectionSkeleton />
+                    
+                    {/* Stats Cards Skeleton */}
+                    <div className="w-full lg:w-3/5 flex flex-col md:flex-row gap-2">
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                    </div>
+                </div>
+
+                {/* Recent Tips Table Skeleton */}
+                <TableSkeleton />
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="p-6 space-y-6">
+                <h1 className="fs_32 outfit_medium text-[#2C2C2C]">Dashboard</h1>
+                <div className="bg-white rounded-xl p-8 shadow-sm border text-center">
+                    <p className="text-red-500 mb-4">{error}</p>
+                    <button 
+                        onClick={fetchDashboardData}
+                        className="bg-[#147187] text-white py-2 px-4 rounded hover:bg-[#147187]/80"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="p-6 space-y-6">
             {/* Dashboard Header */}
@@ -152,9 +285,11 @@ const Dashboard = () => {
                         <div className='flex justify-between'>
                             {/* Generate QR Code Button */}
                             <div className='justify-end flex items-end'>
-                            <button className="w-[100px] h-min fs_10 bg-[#147187] text-white py-2 px-4 whitespace-nowrap rounded hover:bg-[#147187] flex items-center justify-center">
-                                Generate QR Code
-                            </button>
+                                <Link to={'/qr-setup'}>
+                                    <button className="w-[100px] h-min fs_10 bg-[#147187] text-white py-2 px-4 whitespace-nowrap rounded hover:bg-[#147187] flex items-center justify-center">
+                                        Generate QR Code
+                                    </button>
+                                </Link>
                             </div>
 
                             <div className="flex justify-center ">
@@ -173,8 +308,10 @@ const Dashboard = () => {
                     {/* Available Balance */}
                     <div className="flex-1 bg-white rounded-xl p-6 shadow-sm border flex  flex-col justify-between">
                         <div>
-                        <h3 className="fs_20 poppins_medium text-[var(--primary)] mb-2">Available Balance</h3>
-                        <p className="fs_36 plus_Jakarta_Sans_bold font-bold text-gray-900 mb-4">$124.35</p>
+                            <h3 className="fs_20 poppins_medium text-[var(--primary)] mb-2">Available Balance</h3>
+                            <p className="fs_36 plus_Jakarta_Sans_bold font-bold text-gray-900 mb-4">
+                                {dashboardData?.available_balance?.formatted || '$0.00'}
+                            </p>
                         </div>
                         <button className="bg_primary text-white py-2 px-4 rounded fs_10 hover:bg_dark transition-colors">
                             Withdraw
@@ -184,13 +321,17 @@ const Dashboard = () => {
                     {/* Total Tips */}
                     <div className="flex-1 bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-between">
                         <h3 className="fs_20 poppins_medium text-[var(--primary)] mb-2">Total Tips</h3>
-                        <p className="text-3xl plus_Jakarta_Sans_bold text-end">$124.35</p>
+                        <p className="text-3xl plus_Jakarta_Sans_bold text-end">
+                            {dashboardData?.total_tips?.formatted || '$0.00'}
+                        </p>
                     </div>
 
                     {/* Tips This Month */}
                     <div className="flex-1 bg-white rounded-xl p-6 shadow-sm border flex flex-col justify-between">
                         <h3 className="fs_20 poppins_medium text-[var(--primary)] mb-2">Tips This Month</h3>
-                        <p className="text-3xl plus_Jakarta_Sans_bold text-end">$120</p>
+                        <p className="text-3xl plus_Jakarta_Sans_bold text-end">
+                            {dashboardData?.tips_this_month?.formatted || '$0'}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -264,32 +405,38 @@ const Dashboard = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {paginatedData.map((tip) => (
-                                <tr key={tip.id} className="hover:bg-gray-50">
+                            {paginatedData?.length > 0 ? paginatedData?.map((tip) => (
+                                <tr key={tip?.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {tip.no}
+                                        {tip?.no}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {tip.date}
+                                        {tip?.date}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {tip.description}
+                                        {tip?.description}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <span className={getAmountClass(tip.amount)}>
-                                            {formatAmount(tip.amount)}
+                                        <span className={getAmountClass(tip?.amount)}>
+                                            {formatAmount(tip?.amount)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={getStatusBadge(tip.status)}>
-                                            {tip.status}
+                                        <span className={getStatusBadge(tip?.status)}>
+                                            {tip?.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {getActionButton(tip.action, tip.status)}
+                                        {getActionButton(tip?.action, tip?.status)}
                                     </td>
                                 </tr>
-                            ))}
+                            )) : (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                                        No recent tips found
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -299,7 +446,7 @@ const Dashboard = () => {
                     <div className="px-6 py-3 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-700">
-                                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredAndSortedData.length)} of {filteredAndSortedData.length} results
+                                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredAndSortedData?.length || 0)} of {filteredAndSortedData?.length || 0} results
                             </div>
                             <div className="flex gap-2">
                                 <button
@@ -309,7 +456,7 @@ const Dashboard = () => {
                                 >
                                     Previous
                                 </button>
-                                {[...Array(totalPages)].map((_, i) => (
+                                {[...Array(totalPages)]?.map((_, i) => (
                                     <button
                                         key={i + 1}
                                         onClick={() => setCurrentPage(i + 1)}

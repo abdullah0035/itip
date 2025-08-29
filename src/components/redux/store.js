@@ -12,7 +12,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage,
-  // whitelist: ['auth','appData'], // persist only 'auth' and 'themeDark'
+  whitelist: ['auth'], // persist only 'auth'
 };
 
 // Create the persisted reducer

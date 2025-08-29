@@ -4,7 +4,7 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState: {
     isLogin: false,
-    tempUserData: null,
+    loginRedirect: '/dashboard',
     token: '',
     userData: null,
   },
@@ -22,15 +22,17 @@ export const authSlice = createSlice({
     setUserData: (state, action) => {
       state.userData = action.payload;
     },
+    setLoginRedirect: (state, action) => {
+      state.loginRedirect = action.payload;
+    },
     setLogout: (state, action) => {
       state.isLogin = false;
-      state.tempUserData = null;
       state.token = '';
       state.userData = null;
     }
   },
 });
 
-export const { setLogin, setLogout, setToken, setUserData, setTempUserData } = authSlice.actions;
+export const { setLogin, setLogout, setToken, setUserData, setTempUserData,setLoginRedirect } = authSlice.actions;
 
 export default authSlice.reducer;

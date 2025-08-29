@@ -1,9 +1,10 @@
+// publicRoutes.js - Fixed redirect destination
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from './useAuth'
 
 function PublicRoutes() {
     const auth = useAuth()
-    return auth ? <Navigate to='/onboading' /> : <Outlet />
+    return auth ? <Navigate to='/dashboard' /> : <Outlet />
 }
 
 export default PublicRoutes

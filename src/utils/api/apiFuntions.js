@@ -1,11 +1,14 @@
 /* eslint-disable no-unused-vars */
 import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from "./axiosInstance";
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import { setLogout } from '../../components/redux/loginForm';
 // import { decryptData } from "./encrypted";
 // import { setLogout } from "../redux/loginForm";
 
 const ApiFunction = () => {
-const setLogout = ()=>{
+const setLogouttt = ()=>{
 localStorage.removeItem('isLogin_admin');
 }
 
@@ -13,7 +16,7 @@ localStorage.removeItem('isLogin_admin');
     const navigate = useNavigate()
 
     const handleUserLogout = () => {
-        setLogout();
+        setLogouttt();
     }
 
 
@@ -25,7 +28,7 @@ localStorage.removeItem('isLogin_admin');
     const header2 = {
         "Content-Type": "multipart/form-data",
     };
-
+    const dispatch = useDispatch();
     // API Functions
     const get = async (endpoint, params) => {
         try {
@@ -42,12 +45,15 @@ localStorage.removeItem('isLogin_admin');
             console.error("Error in GET request:", error);
             if (error?.response?.status === 401) {
                 handleUserLogout()
+            }else if(error?.response?.status === 403){
+                dispatch(setLogout());
+                toast.error('Session Expired! Please log in again.');
             }
             throw error;
         }
     };
 
-    const post = async (endpoint, apiData, headers = header2) => {
+    const post = async (endpoint, apiData, headers = header1) => {
         try {
             const response = await axiosInstance.post(endpoint, apiData, {
                 headers: {
@@ -59,6 +65,9 @@ localStorage.removeItem('isLogin_admin');
             console.error("Error in POST request:", error);
             if (error?.response?.status === 401) {
                 handleUserLogout()
+            }else if(error?.response?.status === 403){
+                dispatch(setLogout());
+                toast.error('Session Expired! Please log in again.');
             }
             throw error;
         }
@@ -76,6 +85,9 @@ localStorage.removeItem('isLogin_admin');
             console.error("Error in DELETE request:", error);
             if (error?.response?.status === 401) {
                 handleUserLogout()
+            }else if(error?.response?.status === 403){
+                dispatch(setLogout());
+                toast.error('Session Expired! Please log in again.');
             }
             throw error;
         }
@@ -93,6 +105,9 @@ localStorage.removeItem('isLogin_admin');
             console.error("Error in PUT request:", error);
             if (error?.response?.status === 401) {
                 handleUserLogout()
+            }else if(error?.response?.status === 403){
+                dispatch(setLogout());
+                toast.error('Session Expired! Please log in again.');
             }
             throw error;
         }

@@ -1,10 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Logo } from '../../icons/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import ApiFunction from '../../../utils/api/apiFuntions'
+import { toast } from 'react-toastify'
 
-const VerificationCode = ({ email = "random@gmail.com" }) => {
+const VerificationCode = ({ email: propEmail }) => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { post } = ApiFunction()
   
+  // Get email from props, location state, or default
+  const email = propEmail || location.state?.email || "random@gmail.com"
+  
+  if(email === ""){
+  navigate('/');
+}
   // Form state
   const [code, setCode] = useState(['', '', '', '', ''])
   const [errors, setErrors] = useState({})
@@ -104,109 +114,135 @@ const VerificationCode = ({ email = "random@gmail.com" }) => {
     }
   }
 
-  // Validate code
+  // Enhanced validation function
   const validateCode = () => {
     const enteredCode = code.join('')
     const newErrors = {}
     
-    if (enteredCode.length !== 5) {
+    if (!enteredCode.trim()) {
+      newErrors.code = 'Verification code is required'
+    } else if (enteredCode.length !== 5) {
       newErrors.code = 'Please enter the complete 5-digit code'
-      setErrors(newErrors)
-      return false
-    }
-    
-    if (!/^\d{5}$/.test(enteredCode)) {
+    } else if (!/^\d{5}$/.test(enteredCode)) {
       newErrors.code = 'Code must contain only numbers'
-      setErrors(newErrors)
-      return false
+    }
+
+    // Validate email as well
+    if (!email || !email.trim()) {
+      newErrors.email = 'Email is required for verification'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      newErrors.email = 'Invalid email format'
     }
     
-    return true
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
-  // Handle code submission
+  // Handle code submission with API integration
   const handleSubmit = async () => {
     if (!validateCode()) {
       return
     }
     
+    const enteredCode = code.join('')
+    const payload = {
+      email: email.trim().toLowerCase(),
+      code: enteredCode,
+      action: 'verifyCode'
+    }
+    
     setIsLoading(true)
     
-    try {
-      const enteredCode = code.join('')
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Here you would typically verify the code with your backend
-      console.log('Verifying code:', enteredCode)
-      
-      // Simulate code verification
-      if (enteredCode === '12345') {
-        // Demo: accept 12345 as valid code
-        navigate('/signup')
-      } else if (enteredCode === '00000') {
-        // Demo: accept 00000 as valid code (as set in original)
-        navigate('/signup')
-      } else {
-        // Invalid code
+    await post('', payload)
+      .then((res) => {
+        setIsLoading(false)
+        if (res?.status) {
+          // Success - navigate to signup
+            toast.success('Email is verified Now Signup');
+          navigate('/signup', { 
+            state: { 
+              email: email,
+              verified: true 
+            } 
+          })
+        } else {
+          // Error from server
+          setErrors({ 
+            code: res?.message || 'Invalid verification code. Please try again.' 
+          })
+          // Clear the code on error
+          setCode(['', '', '', '', ''])
+          inputRefs.current[0]?.focus()
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false)
+        console.error('Verification error:', error)
         setErrors({
-          code: 'Invalid verification code. Please try again.'
+          code: error.message || 'Verification failed. Please try again.'
         })
-        // Clear the code
+        // Clear the code on error
         setCode(['', '', '', '', ''])
         inputRefs.current[0]?.focus()
-      }
-      
-    } catch (error) {
-      console.error('Verification error:', error)
-      setErrors({
-        code: error.message || 'Verification failed. Please try again.'
       })
-    } finally {
-      setIsLoading(false)
-    }
   }
 
-  // Handle resend code
+  // Handle resend code with API integration
   const handleResendCode = async () => {
     if (!canResend) return
+    
+    // Validate email before resending
+    if (!email || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrors({
+        resend: 'Invalid email address for resending code'
+      })
+      return
+    }
+    
+    const payload = {
+      email: email.trim().toLowerCase(),
+      action: 'verificationCode'
+    }
     
     setIsLoading(true)
     clearErrors()
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Resending code to:', email)
-      
-      // Reset timer and state
-      setResendTimer(60)
-      setCanResend(false)
-      setCode(['', '', '', '', ''])
-      
-      // Show success message briefly
-      setErrors({
-        success: 'Verification code sent successfully!'
+    await post('', payload)
+      .then((res) => {
+        setIsLoading(false)
+        if (res?.status) {
+          // Success - reset timer and state
+          setResendTimer(60)
+          setCanResend(false)
+          setCode(['', '', '', '', ''])
+          
+          // Show success message briefly
+          setErrors({
+            success: res?.message || 'Verification code sent successfully!'
+          })
+          
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            setErrors({})
+          }, 3000)
+          
+          // Focus first input
+          inputRefs.current[0]?.focus()
+          
+        } else {
+          // Error from server
+          setErrors({
+            resend: res?.message || 'Failed to resend code. Please try again.'
+          })
+        }
       })
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setErrors({})
-      }, 3000)
-      
-      // Focus first input
-      inputRefs.current[0]?.focus()
-      
-    } catch (error) {
-      console.error('Resend error:', error)
-      setErrors({
-        resend: error.message || 'Failed to resend code. Please try again.'
+      .catch((error) => {
+        setIsLoading(false)
+        console.error('Resend error:', error)
+        setErrors({
+          resend: error.message || 'Failed to resend code. Please try again.'
+        })
       })
-    } finally {
-      setIsLoading(false)
-    }
   }
 
   const isCodeComplete = code.every(digit => digit !== '')
@@ -257,6 +293,10 @@ const VerificationCode = ({ email = "random@gmail.com" }) => {
           {/* Error Messages */}
           {errors.code && (
             <p className="text-red-500 fs_14 text-center mb-4">{errors.code}</p>
+          )}
+          
+          {errors.email && (
+            <p className="text-red-500 fs_14 text-center mb-4">{errors.email}</p>
           )}
           
           {errors.success && (

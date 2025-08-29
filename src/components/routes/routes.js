@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+// Routing.js - Updated with better route organization
+import { Route, Routes, Navigate } from 'react-router-dom'
 import PrivateRoutes from '../redux/auth/privateRoutes'
 import PublicRoutes from '../redux/auth/publicRoutes'
 import Login from '../pages/onboading/login'
@@ -15,20 +14,23 @@ import QrCode from '../pages/dashboard/qrCode'
 import Funds from '../pages/dashboard/funds'
 import History from '../pages/dashboard/history'
 import Account from '../pages/dashboard/account'
+import { useAuth } from '../redux/auth/useAuth'
+import { useSelector } from 'react-redux'
+
+// Root redirect component
+const RootRedirect = () => {
+  const auth = useAuth()
+  const loginRedirect = useSelector(state => state.auth?.loginRedirect) ?? "/dashboard";
+  console.log("the login redirect is ", loginRedirect);
+  return <Navigate to={auth ? loginRedirect : '/'} />
+}
 
 const Routing = () => {
   return (
     <>
-      
       <Routes>
-        {/* <Route element={<PrivateRoutes />}></Route>
-        <Route element={<PublicRoutes />}>
-        </Route> */}
-          <Route path='/' element={<Login />} />
-          <Route path='/get-started' element={<GetStarted />} />
-          <Route path='/signup' element={<Signup />} />
-          <Route path='/verification' element={<VerificationCode />} />
-          <Route path='/success' element={<SuccessScreen />} />
+        {/* Private Routes */}
+        <Route element={<PrivateRoutes />}>
           <Route path='/qr-setup' element={<QRCodeSetup />} />
           <Route path='/home' element={<Home />} />
           <Route path='/dashboard' element={<Dashboard />} />
@@ -36,6 +38,19 @@ const Routing = () => {
           <Route path='/funds' element={<Funds />} />
           <Route path='/history' element={<History />} />
           <Route path='/account' element={<Account />} />
+        </Route>
+
+        {/* Public Routes */}
+        <Route element={<PublicRoutes />}>
+          <Route path='/' element={<Login />} />
+          <Route path='/get-started' element={<GetStarted />} />
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/verification' element={<VerificationCode />} />
+          <Route path='/success' element={<SuccessScreen />} />
+        </Route>
+
+        {/* Fallback route - redirects to appropriate page based on auth */}
+        <Route path='*' element={<RootRedirect />} />
       </Routes>
     </>
   )
