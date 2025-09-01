@@ -4,13 +4,15 @@ import {
     RiQuestionLine,
     RiShieldCheckLine,
     RiLogoutBoxLine,
-    RiEditLine
+    RiEditLine,
+    RiUserSettingsLine
 } from '@remixicon/react'
 import EditProfile from './dashboardComponent/editProfile';
 import ChangePassword from './changePassword';
 import HelpSupport from './dashboardComponent/helpSupport';
 import { useSelector } from 'react-redux';
 import { decryptData } from '../../../utils/api/encrypted';
+import AccountManage from './accountManage';
 
 const Account = () => {
     const qrCodesLength = 2;
@@ -57,6 +59,12 @@ const Account = () => {
             isActive: activeComponent === 'privacyPolicy',
             onClick: handlePrivacyPolicy
         },
+         {
+            title: "Account Management",
+            icon: RiUserSettingsLine,
+            isActive: activeComponent === 'account',
+            onClick: () => setActiveComponent('account')
+        },
         {
             title: "Sign Out",
             icon: RiLogoutBoxLine,
@@ -74,6 +82,8 @@ const Account = () => {
                 return 'Account > Change Password';
             case 'helpSupport':
                 return 'Account > Help & Support';
+            case 'account':
+                return 'Account > Account Management';
             default:
                 return 'Account';
         }
@@ -88,6 +98,8 @@ const Account = () => {
                 return <ChangePassword />;
             case 'helpSupport':
                 return <HelpSupport />;
+                  case 'account':
+                return <AccountManage />;
             default:
                 return <EditProfile />;
         }
@@ -145,7 +157,7 @@ const Account = () => {
                                 <button
                                     key={index}
                                     onClick={item?.onClick}
-                                    className={`w-full flex items-center space-x-3 px-4 h-[54px] text-left transition-colors ${item?.isActive
+                                    className={`w-full flex items-center space-x-3 px-4 h-[42px] text-left transition-colors ${item?.isActive
                                         ? 'bg-[var(--primary)] text-white'
                                         : 'text-gray-700 hover:bg-gray-50'
                                         }`}
@@ -162,7 +174,7 @@ const Account = () => {
                         {/* Mobile Tabs */}
                         <div className="lg:hidden">
                             {/* Mobile Tab Navigation */}
-                            <div className="flex overflow-x-auto no_scroll md:block hidden border border-[var(--border-color)] rounded-lg mb-4">
+                            <div className=" overflow-x-auto no_scroll md:flex hidden border border-[var(--border-color)] rounded-lg mb-4">
                                 <button
                                     onClick={() => setActiveComponent('editProfile')}
                                     className={`flex-shrink-0 flex items-center space-x-2 px-4 py-3 text-sm plus_Jakarta_Sans_medium transition-colors ${activeComponent === 'editProfile'

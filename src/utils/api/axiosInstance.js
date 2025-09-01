@@ -1,5 +1,4 @@
 import axios from "axios"
-import { toast } from 'react-toastify';
 
 export const baseURL = 'https://btctrades.live/itip/api.php'
 export const ImageURL = 'http://localhost/tip/api.php'
@@ -50,7 +49,7 @@ axiosInstance.interceptors.response.use(
         }
         
         // Show toast message only once
-        toast.error('Session Expired! Please log in again.');
+        // toast.error('Session Expired! Please log in again.');
         
         // Reset the flag after a short delay to allow for navigation
         setTimeout(() => {

@@ -286,7 +286,7 @@ const dispatch = useDispatch();
                             {/* Generate QR Code Button */}
                             <div className='justify-end flex items-end'>
                                 <Link to={'/qr-setup'}>
-                                    <button className="w-[100px] h-min fs_10 bg-[#147187] text-white py-2 px-4 whitespace-nowrap rounded hover:bg-[#147187] flex items-center justify-center">
+                                    <button className="w-[120px] h-min fs_10  bg-[#147187] text-white py-2 px-4 whitespace-nowrap rounded hover:bg-[#147187] flex items-center justify-center">
                                         Generate QR Code
                                     </button>
                                 </Link>
