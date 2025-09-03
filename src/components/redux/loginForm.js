@@ -33,6 +33,7 @@ export const authSlice = createSlice({
       state.isLogin = false;
       state.token = '';
       state.userData = null;
+      state.customerLogin = false;
     }
   },
 });

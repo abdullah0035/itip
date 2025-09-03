@@ -8,7 +8,7 @@ import { toast } from 'react-toastify'
 import Input from '../../../../utils/input'
 import ApiFunction from '../../../../utils/api/apiFuntions'
 import { encryptData } from '../../../../utils/api/encrypted'
-import { setLogin, setLoginRedirect, setToken, setUserData } from '../../../redux/loginForm'
+import { setCustomerLogin, setLoginRedirect, setToken, setUserData } from '../../../redux/loginForm'
 import { Logo } from '../../../icons/icons'
 
 const CustomerLogin = () => {
@@ -181,7 +181,7 @@ const CustomerLogin = () => {
                 dispatch(setLoginRedirect('/customer-dashboard'));
                 dispatch(setToken(token));
                 dispatch(setUserData(userData));
-                dispatch(setLogin(true));
+                dispatch(setCustomerLogin(true));
             } else if (res?.status === 'error') {
                 // Handle API error responses
                 const errorMessage = res?.message || 'Login failed';
@@ -294,7 +294,7 @@ const CustomerLogin = () => {
                         dispatch(setLoginRedirect('/customer-dashboard'));
                         dispatch(setToken(token));
                         dispatch(setUserData(userData));
-                        dispatch(setLogin(true));
+                        dispatch(setCustomerLogin(true));
                     } else {
                         toast.error(res.message || 'Google login failed');
                     }
@@ -394,7 +394,7 @@ const CustomerLogin = () => {
                             dispatch(setLoginRedirect('/customer-dashboard'));
                             dispatch(setToken(token));
                             dispatch(setUserData(userData));
-                            dispatch(setLogin(true));
+                            dispatch(setCustomerLogin(true));
                         } else {
                             toast.error(res.message || 'Facebook login failed');
                         }
@@ -416,12 +416,7 @@ const CustomerLogin = () => {
                 <h1 className='fs_36 outfit_medium'>Customer Login</h1>
                 <h2 className='outfit mb-5 fs_20'>Login to give tips easily</h2>
 
-                {/* Divider */}
-                <div className="flex items-center my-6">
-                    <div className="flex-1 border-t border-gray-300"></div>
-                    <div className="px-4 text-sm text-gray-500 bg-white">or</div>
-                    <div className="flex-1 border-t border-gray-300"></div>
-                </div>
+                
 
                 {/* Regular Login Form */}
                 <form onSubmit={handleSubmit}>
@@ -467,12 +462,15 @@ const CustomerLogin = () => {
                     <Link to={'/customer-register'} className='text-[var(--primary)]'> Create New</Link>
                 </span>
 
+{/* Divider */}
+                <div className="flex items-center my-6">
+                    <div className="flex-1 border-t border-gray-300"></div>
+                    <div className="px-4 text-sm text-gray-500 bg-white">or</div>
+                    <div className="flex-1 border-t border-gray-300"></div>
+                </div>
                 <div className="social-login my-6">
                     <div className="mb-3">
                         <div id="google-login-button" className="w-full min-h-[44px] flex items-center justify-center rounded-lg">
-                            {socialLoading.google && (
-                                <span className="text-sm text-gray-500">Loading Google Sign-In...</span>
-                            )}
                         </div>
                     </div>
 

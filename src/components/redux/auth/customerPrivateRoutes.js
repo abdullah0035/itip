@@ -1,12 +1,10 @@
-// publicRoutes.js - Fixed redirect destination
 import { useSelector } from 'react-redux'
 import { Outlet, Navigate } from 'react-router-dom'
 
-
-function UserRoutes() {
+function CustomerPrivateRoutes() {
     const customerLogin = useSelector(state => state.auth.customerLogin);
-
-    return customerLogin ? <Navigate to='/dashboard' /> : <Outlet />
+    
+    return customerLogin ? <Outlet /> : <Navigate to='/customer-login' />
 }
 
-export default UserRoutes
+export default CustomerPrivateRoutes

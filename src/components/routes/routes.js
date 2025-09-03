@@ -1,4 +1,4 @@
-// Routing.js - Updated with better route organization
+// Routing.js - Updated with shared dashboard routes
 import { Route, Routes, Navigate } from 'react-router-dom'
 import PrivateRoutes from '../redux/auth/privateRoutes'
 import PublicRoutes from '../redux/auth/publicRoutes'
@@ -17,15 +17,16 @@ import Account from '../pages/dashboard/account'
 import { useAuth } from '../redux/auth/useAuth'
 import { useSelector } from 'react-redux'
 import Checkout from '../pages/home/checkout'
-import UserRoutes from '../redux/auth/userRoutes'
 import CustomerLogin from '../pages/customer/onboading/login'
-import CustomerSignup from '../pages/customer/signup'
+import CustomerPrivateRoutes from '../redux/auth/customerPrivateRoutes'
+import CustomerPublicRoutes from '../redux/auth/customerPublicRoutes'
+import CustomerSignup from '../pages/customer/onboading/signup'
+import CustomerDashboard from '../pages/customer/dashboard/customerDashboard'
 
 // Root redirect component
 const RootRedirect = () => {
   const auth = useAuth()
   const loginRedirect = useSelector(state => state.auth?.loginRedirect) ?? "/dashboard";
-  console.log("the login redirect is ", loginRedirect);
   return <Navigate to={auth ? loginRedirect : '/'} />
 }
 
@@ -33,7 +34,7 @@ const Routing = () => {
   return (
     <>
       <Routes>
-        {/* Private Routes */}
+        {/* Service Provider Private Routes */}
         <Route element={<PrivateRoutes />}>
           <Route path='/qr-setup' element={<QRCodeSetup />} />
           <Route path='/home' element={<Home />} />
@@ -44,7 +45,7 @@ const Routing = () => {
           <Route path='/account' element={<Account />} />
         </Route>
 
-        {/* Public Routes */}
+        {/* Service Provider Public Routes */}
         <Route element={<PublicRoutes />}>
           <Route path='/' element={<Login />} />
           <Route path='/get-started' element={<GetStarted />} />
@@ -53,11 +54,21 @@ const Routing = () => {
           <Route path='/success' element={<SuccessScreen />} />
         </Route>
 
-        <Route element={<UserRoutes />}>
+        {/* Customer Private Routes - Share same dashboard components */}
+        <Route element={<CustomerPrivateRoutes />}>
+          <Route path='/customer-dashboard' element={<CustomerDashboard />} />
+          <Route path='/customer-history' element={<History />} />
+          <Route path='/customer-account' element={<Account />} />
+          {/* You can add customer-specific routes here if needed */}
         </Route>
+
+        {/* Customer Public Routes */}
+        <Route element={<CustomerPublicRoutes />}>
           <Route path='/customer-login' element={<CustomerLogin />} />
           <Route path='/customer-signup' element={<CustomerSignup />} />
+        </Route>
 
+        {/* Public tip route - accessible to everyone */}
         <Route path="/tip/:qrToken" element={<Checkout />} />
 
         {/* Fallback route - redirects to appropriate page based on auth */}

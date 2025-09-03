@@ -3,17 +3,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react'
 import { RiEyeFill, RiInformationFill } from '@remixicon/react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import Input from '../../../utils/input'
-import { Logo } from '../../icons/icons'
-import ApiFunction from '../../../utils/api/apiFuntions'
+import { Link, useLocation } from 'react-router-dom'
+import Input from '../../../../utils/input'
+import { Logo } from '../../../icons/icons'
+import ApiFunction from '../../../../utils/api/apiFuntions'
 import { useDispatch, useSelector } from 'react-redux'
-import { encryptData } from '../../../utils/api/encrypted'
-import { setLogin, setLoginRedirect, setToken, setUserData } from '../../redux/loginForm'
+import { encryptData } from '../../../../utils/api/encrypted'
+import { setCustomerLogin, setLogin, setLoginRedirect, setToken, setUserData } from '../../../redux/loginForm'
 import { toast } from 'react-toastify'
 
-const CustomerSignup = ({ email: propEmail }) => {
-  const location = useLocation()
+const CustomerSignup = () => {
   const { post } = ApiFunction()
   const dispatch = useDispatch();
 
@@ -307,7 +306,7 @@ const CustomerSignup = ({ email: propEmail }) => {
         dispatch(setLoginRedirect('/customer-dashboard')); // or wherever customers should go
         dispatch(setToken(token));
         dispatch(setUserData(userData));
-        dispatch(setLogin(true));
+        dispatch(setCustomerLogin(true));
         toast.success('Account created successfully! Welcome!');
       } else if (res?.status === 'error') {
         // Handle API error responses (including 409 errors)

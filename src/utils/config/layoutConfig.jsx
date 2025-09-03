@@ -1,4 +1,4 @@
-// config/layoutConfig.js
+// config/layoutConfig.js - Enhanced for both user types
 
 import { 
   RiQrCodeLine, 
@@ -11,11 +11,15 @@ import {
 // Routes where dashboard layout (header + sidebar) should be shown
 export const dashboardRoutes = [
   '/dashboard',
-  '/qr-codes',
+  '/qr-codes', 
   '/funds',
   '/history',
   '/users',
-  '/account'
+  '/account',
+  // Customer dashboard routes
+  '/customer-dashboard',
+  '/customer-history', 
+  '/customer-account'
 ]
 
 // Auth routes where mainScreen class should be applied
@@ -38,8 +42,8 @@ export const cleanRoutes = [
   ...authRoutes // Include all auth routes in clean routes
 ]
 
-// Sidebar navigation items
-export const sidebarItems = [
+// Service Provider sidebar navigation items
+export const serviceProviderSidebarItems = [
   { 
     name: 'Dashboard', 
     icon: RiLayoutGridFill, 
@@ -68,12 +72,32 @@ export const sidebarItems = [
   },
 ]
 
+// Customer sidebar navigation items  
+export const customerSidebarItems = [
+  { 
+    name: 'Dashboard', 
+    icon: RiLayoutGridFill, 
+    href: '/customer-dashboard',
+    active: true 
+  },
+  { 
+    name: 'History', 
+    icon: RiTimeFill, 
+    href: '/customer-history' 
+  },
+  { 
+    name: 'Account', 
+    icon: RiUserFill, 
+    href: '/customer-account',
+  },
+]
+
 // Helper function to check if current path should show dashboard layout
 export const shouldShowDashboardLayout = (pathname) => {
   return dashboardRoutes.some(route => pathname.startsWith(route))
 }
 
-// FIXED: Helper function to check if current path is auth route (should have mainScreen class)
+// Helper function to check if current path is auth route (should have mainScreen class)
 export const isAuthRoute = (pathname) => {
   return authRoutes?.some(route => {
     if (route === '/') {
@@ -91,6 +115,17 @@ export const shouldShowCleanLayout = (pathname) => {
     }
     return pathname === route || pathname.startsWith(route + '/')
   })
+}
+
+// Helper function to get appropriate sidebar items based on user type
+export const getSidebarItems = (userType) => {
+  switch (userType) {
+    case 'customer':
+      return customerSidebarItems
+    case 'service_provider':
+    default:
+      return serviceProviderSidebarItems
+  }
 }
 
 // Helper function to get layout type

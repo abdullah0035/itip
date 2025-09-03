@@ -1,7 +1,8 @@
+// App.js - Fixed imports
 import { ToastContainer } from 'react-toastify'
 import { BrowserRouter } from 'react-router-dom'
 import { Suspense } from 'react'
-import { Provider } from 'react-redux' // Add this import
+import { Provider } from 'react-redux'
 import './App.css'
 import './components/assets/css/color.css'
 import './components/assets/css/style.css'
@@ -10,7 +11,7 @@ import Routing from './components/routes/routes'
 import Header from './components/pages/dashboard/dashboardComponent/header'
 import Sidebar from './components/pages/dashboard/dashboardComponent/sidebar'
 import { useLayout } from './utils/hooks/useLayout'
-import { sidebarItems } from './utils/config/layoutConfig'
+// Remove this line: import { sidebarItems } from './utils/config/layoutConfig'
 import { store } from './components/redux/store'
 
 // Loading component
@@ -28,6 +29,7 @@ const LayoutWrapper = () => {
     user,
     currentPath,
     isAuthRoute,
+    sidebarItems, // This comes from useLayout hook now
     toggleSidebar,
     closeSidebar,
     logout
@@ -46,7 +48,7 @@ const LayoutWrapper = () => {
           <Sidebar
             isOpen={sidebarOpen}
             onClose={closeSidebar}
-            sidebarItems={sidebarItems}
+            sidebarItems={sidebarItems} // Dynamic items from useLayout
             currentPath={currentPath}
           />
         </>
@@ -82,13 +84,9 @@ const LayoutWrapper = () => {
 }
 
 function App () {
-  //   const {
-  //   showLayout,
-  // } = useLayout()
   return (
-    <Provider store={store}> {/* Wrap everything with Redux Provider */}
+    <Provider store={store}>
       <Suspense fallback={<LoadingSpinner />}>
-        {/* Remove mainScreen class from here - it's now conditional */}
         <main className={` h_100vh`}>
           <BrowserRouter>
             <LayoutWrapper />
