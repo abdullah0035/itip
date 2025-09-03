@@ -1,10 +1,10 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { RiMenuLine, RiTriangleFill } from '@remixicon/react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLogout } from '../../../redux/loginForm'
 import { toast } from 'react-toastify'
-import ApiFunction from '../../../../utils/api/apiFuntions'
 import { decryptData } from '../../../../utils/api/encrypted'
 
 const Header = ({ onToggleSidebar }) => {
@@ -12,43 +12,22 @@ const Header = ({ onToggleSidebar }) => {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
   const dispatch = useDispatch()
-  const { get } = ApiFunction()
 
-  // Get token from Redux store
-  const encryptedToken = useSelector(state => state.auth?.token)
-  const token = useMemo(() => {
-    return encryptedToken ? decryptData(encryptedToken) : null
-  }, [encryptedToken])
+  // Fetch user profile data from Redux store
+  const encryptedUserData = useSelector(state => state.auth?.userData)
+  
+  // Memoize the decrypted data to prevent unnecessary re-renders
+  const decryptedData = useMemo(() => {
+    return encryptedUserData ? decryptData(encryptedUserData) : null
+  }, [encryptedUserData])
 
-  // Fetch user profile data
+  console.log("the decrypted data is", decryptedData)
+
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!token) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        setLoading(true)
-        const response = await get(`?action=getUserProfile&token=${encodeURIComponent(token)}`)
-        
-        if (response?.status === 'success') {
-          setUserData(response.user_data)
-        } else {
-          console.error('Failed to fetch user profile:', response?.message)
-          toast.error('Failed to load user profile')
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error)
-        toast.error('An error occurred while loading user profile')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUserProfile()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token])
+    setUserData(decryptedData)
+    // Set loading to false since we have the data (or confirmed there's no data)
+    setLoading(false)
+  }, [decryptedData])
 
   const toggleUserDropdown = () => {
     setUserDropdownOpen(!userDropdownOpen)

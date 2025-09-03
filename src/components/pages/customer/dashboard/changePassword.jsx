@@ -2,16 +2,16 @@ import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { RiEyeFill } from '@remixicon/react'
-import ApiFunction from '../../../utils/api/apiFuntions'
-import { decryptData } from '../../../utils/api/encrypted'
-import Input from '../../../utils/input'
+import ApiFunction from '../../../../utils/api/apiFuntions'
+import { decryptData } from '../../../../utils/api/encrypted'
+import Input from '../../../../utils/input'
 
 const ChangePassword = () => {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
     const { post } = ApiFunction()
     
-    // Get token from Redux store
+    // Get token from Redux store - Updated for customer
     const encryptedToken = useSelector(state => state.auth?.token)
     const token = decryptData(encryptedToken)
 
@@ -93,7 +93,7 @@ const ChangePassword = () => {
         }
 
         const data = {
-            action: 'changePassword',
+            action: 'changeCustomerPassword', // Updated for customer API
             token: token,
             old_password: passwordData.oldPassword,
             new_password: passwordData.newPassword,
@@ -117,8 +117,10 @@ const ChangePassword = () => {
                 
                 // Clear any existing errors
                 setErrors({})
-            }else if(response?.message === 'Current password is incorrect'){
-                toast.error('Current password is incorrect');
+            } else if (response?.message === 'Current password is incorrect') {
+                toast.error('Current password is incorrect')
+            } else if (response?.message === 'Password cannot be changed for social login accounts') {
+                toast.error('Password cannot be changed for social login accounts (Google/Facebook)')
             } else {
                 if (response?.errors && Array.isArray(response.errors)) {
                     // Handle validation errors from API
@@ -132,7 +134,7 @@ const ChangePassword = () => {
                 }
             }
         } catch (error) {
-            console.error('Password change error:', error)
+            console.error('Customer password change error:', error)
             toast.error('An error occurred. Please try again.')
         } finally {
             setLoading(false)

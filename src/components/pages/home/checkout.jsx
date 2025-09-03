@@ -4,6 +4,8 @@ import { toast } from 'react-toastify'
 import QRCode from 'qrcode'
 import ApiFunction from '../../../utils/api/apiFuntions'
 import { useParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { decryptData } from '../../../utils/api/encrypted'
 
 const Checkout = () => {
     const {qrToken} = useParams();
@@ -16,6 +18,9 @@ const Checkout = () => {
     const [qrData, setQrData] = useState(null)
     const [qrCodeUrl, setQrCodeUrl] = useState('')
     const [errors, setErrors] = useState({})
+
+     const encryptedToken = useSelector(state => state?.auth?.token)
+    const token = decryptData(encryptedToken)
     
     const [formData, setFormData] = useState({
         name: '',
@@ -155,6 +160,7 @@ const Checkout = () => {
         try {
             const response = await post('', {
                 action: 'processTip',
+                customer_token: token ?? "",
                 qr_token: qrToken,
                 name: formData.name.trim(),
                 profession: formData.profession.trim(),

@@ -22,6 +22,8 @@ import CustomerPrivateRoutes from '../redux/auth/customerPrivateRoutes'
 import CustomerPublicRoutes from '../redux/auth/customerPublicRoutes'
 import CustomerSignup from '../pages/customer/onboading/signup'
 import CustomerDashboard from '../pages/customer/dashboard/customerDashboard'
+import CustomerHistory from '../pages/customer/dashboard/history'
+import CustomerAccount from '../pages/customer/dashboard/account'
 
 // Root redirect component
 const RootRedirect = () => {
@@ -57,8 +59,8 @@ const Routing = () => {
         {/* Customer Private Routes - Share same dashboard components */}
         <Route element={<CustomerPrivateRoutes />}>
           <Route path='/customer-dashboard' element={<CustomerDashboard />} />
-          <Route path='/customer-history' element={<History />} />
-          <Route path='/customer-account' element={<Account />} />
+          <Route path='/customer-history' element={<CustomerHistory />} />
+          <Route path='/customer-account' element={<CustomerAccount />} />
           {/* You can add customer-specific routes here if needed */}
         </Route>
 

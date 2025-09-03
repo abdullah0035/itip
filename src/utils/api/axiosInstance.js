@@ -1,6 +1,7 @@
 import axios from "axios"
 
 export const baseURL = 'https://btctrades.live/itip/api.php'
+// export const baseURL = 'http://localhost/tip/api.php'
 export const ImageURL = 'http://localhost/tip/api.php'
 
 // Flag to prevent multiple simultaneous logout actions

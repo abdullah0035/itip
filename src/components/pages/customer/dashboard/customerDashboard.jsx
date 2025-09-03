@@ -7,7 +7,6 @@ import ApiFunction from '../../../../utils/api/apiFuntions'
 import { decryptData } from '../../../../utils/api/encrypted'
 import { setLogout } from '../../../redux/loginForm'
 import { RiArrowDownLine, RiArrowUpLine, RiEyeLine, RiSearchLine } from '@remixicon/react'
-import debounce from 'debounce'
 
 const CustomerDashboard = () => {
     const navigate = useNavigate()
@@ -15,9 +14,8 @@ const CustomerDashboard = () => {
     const { get } = ApiFunction()
     
     // Get encrypted token from Redux store (assuming customer auth structure)
-    const encryptedToken = useSelector(state => state?.customerAuth?.token)
+    const encryptedToken = useSelector(state => state.auth?.token)
     const token = decryptData(encryptedToken)
-
     // State management
     const [dashboardData, setDashboardData] = useState(null)
     const [recentTips, setRecentTips] = useState([])
@@ -30,11 +28,12 @@ const CustomerDashboard = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage] = useState(10)
 
-    const fetchDashboardData = debounce(async () => {
+    // Use useCallback to prevent function recreation on every render
+    const fetchDashboardData = async () => {
         if (!token) {
             setError('Authentication required')
             setIsLoading(false)
-            // navigate('/customer-login')
+            navigate('/customer-login')
             return
         }
 
@@ -46,7 +45,9 @@ const CustomerDashboard = () => {
                 action: 'getCustomerDashboard',
                 token: token
             })
-            console.log("the res is ",response);
+            
+            console.log("the res is ", response);
+            
             if (response?.status === 'success') {
                 setDashboardData(response?.dashboard_data)
                 setRecentTips(response?.dashboard_data?.recent_tips || [])
@@ -62,18 +63,18 @@ const CustomerDashboard = () => {
             
             // If unauthorized, redirect to login
             if (error?.response?.status === 403 || errorMessage?.includes('Unauthorized')) {
-                // navigate('/customer-login')
+                navigate('/customer-login')
                 dispatch(setLogout())
             }
         } finally {
             setIsLoading(false)
         }
-    },1000)
+    }// Dependencies for useCallback
 
-    // Fetch data when component mounts
+    // Fetch data when component mounts or token changes
     useEffect(() => {
         fetchDashboardData()
-    }, [token])
+    }, [])
 
     // Filter and sort data
     const filteredAndSortedData = useMemo(() => {

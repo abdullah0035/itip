@@ -47,6 +47,7 @@ export const useLayout = () => {
   // Load user data from Redux when authentication changes
   useEffect(() => {
     loadUserDataFromRedux()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, userData, token, userType])
 
   // Load user data from Redux (encrypted) or fallback to localStorage

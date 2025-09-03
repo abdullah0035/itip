@@ -94,7 +94,7 @@ const Login = () => {
             dispatch(setUserData(userData));
             dispatch(setLogin(true));
           } else {
-            if(res.message){
+            if (res.message) {
               toast.error(res.message || 'Login failed');
             }
           }
@@ -145,6 +145,10 @@ const Login = () => {
 
           <Link to='' className='float-right text-[var(--primary)] poppins_medium fs_14'>Forgot Password?</Link>
 
+          <span className='block poppins_medium fs_14 text-center mt-10'>
+            Already Registered as Customer?
+            <Link to={'/customer-login'} className='text-[var(--primary)] poppins_medium ms-1'>Login</Link>
+          </span>
 
           {/* Show auth error from hook or form submission error */}
           <button
