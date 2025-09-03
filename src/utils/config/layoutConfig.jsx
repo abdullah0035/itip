@@ -28,6 +28,8 @@ export const authRoutes = [
   '/qr-setup',
   '/onboarding',
   '/home',
+  '/customer-login',
+  '/customer-signup',
 ]
 
 // Routes where NO layout should be shown (clean layout)

@@ -62,7 +62,7 @@ const dispatch = useDispatch();
             
             // If unauthorized, redirect to login
             if (error?.response?.status === 403 || errorMessage?.includes('Unauthorized')) {
-                toast.error('Session expired. Please log in again.')
+                
                 navigate('/')
                 dispatch(setLogout());
             }

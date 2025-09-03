@@ -82,11 +82,14 @@ const LayoutWrapper = () => {
 }
 
 function App () {
+  //   const {
+  //   showLayout,
+  // } = useLayout()
   return (
     <Provider store={store}> {/* Wrap everything with Redux Provider */}
       <Suspense fallback={<LoadingSpinner />}>
         {/* Remove mainScreen class from here - it's now conditional */}
-        <main className='h_100vh'>
+        <main className={` h_100vh`}>
           <BrowserRouter>
             <LayoutWrapper />
           </BrowserRouter>

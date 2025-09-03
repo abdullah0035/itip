@@ -1,8 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { useNavigate } from 'react-router-dom';
 import { axiosInstance } from "./axiosInstance";
 import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
 import { setLogout } from '../../components/redux/loginForm';
 // import { decryptData } from "./encrypted";
 // import { setLogout } from "../redux/loginForm";
@@ -11,9 +9,6 @@ const ApiFunction = () => {
 const setLogouttt = ()=>{
 localStorage.removeItem('isLogin_admin');
 }
-
-
-    const navigate = useNavigate()
 
     const handleUserLogout = () => {
         setLogouttt();
@@ -47,7 +42,7 @@ localStorage.removeItem('isLogin_admin');
                 handleUserLogout()
             }else if(error?.response?.status === 403){
                 dispatch(setLogout());
-                toast.error('Session Expired! Please log in again.');
+                
             }
             throw error;
         }
@@ -67,7 +62,7 @@ localStorage.removeItem('isLogin_admin');
                 handleUserLogout()
             }else if(error?.response?.status === 403){
                 dispatch(setLogout());
-                toast.error('Session Expired! Please log in again.');
+                
             }
             throw error;
         }
@@ -87,7 +82,7 @@ localStorage.removeItem('isLogin_admin');
                 handleUserLogout()
             }else if(error?.response?.status === 403){
                 dispatch(setLogout());
-                toast.error('Session Expired! Please log in again.');
+                
             }
             throw error;
         }
@@ -107,7 +102,7 @@ localStorage.removeItem('isLogin_admin');
                 handleUserLogout()
             }else if(error?.response?.status === 403){
                 dispatch(setLogout());
-                toast.error('Session Expired! Please log in again.');
+                
             }
             throw error;
         }

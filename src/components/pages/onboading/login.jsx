@@ -127,7 +127,7 @@ const Login = () => {
             name="email"
           />
           {errors.email && (
-            <p className="text-red-500 fs_14 mt-1 mb-3">{errors.email}</p>
+            <p className="text-red-500 fs_14 mt-1 mb-3">{errors?.email}</p>
           )}
 
           <Input

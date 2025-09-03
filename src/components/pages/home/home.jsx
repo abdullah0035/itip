@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { decryptData } from '../../../utils/api/encrypted'
 import ApiFunction from '../../../utils/api/apiFuntions'
 import { toast } from 'react-toastify'
+import debounce from 'debounce'
 
 // Note: Install QR code library with: npm install qrcode
 // Also install types if using TypeScript: npm install @types/qrcode
@@ -34,7 +35,7 @@ const Home = ({ qrData }) => {
   }
 
   // Fetch user's QR codes from API
-  const fetchUserQRCodes = async () => {
+  const fetchUserQRCodes = debounce(async () => {
     if (!token) {
       setError('Authentication required')
       setIsLoading(false)
@@ -71,13 +72,13 @@ const Home = ({ qrData }) => {
       
       // If unauthorized, redirect to login
       if (error.response?.status === 403 || errorMessage.includes('Unauthorized')) {
-        toast.error('Session expired. Please log in again.')
+        
         navigate('/')
       }
     } finally {
       setIsLoading(false)
     }
-  }
+  }, 500)
 
   // Generate QR code image from QR string
   const generateQRCodeImage = async (qrString) => {

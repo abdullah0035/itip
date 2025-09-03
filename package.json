@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.11.0",
     "crypto-js": "^4.2.0",
+    "debounce": "^2.2.0",
     "qrcode": "^1.5.4",
     "react": "^19.1.1",
     "react-data-table-component": "^7.7.0",

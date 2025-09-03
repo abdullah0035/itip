@@ -5,6 +5,7 @@ import Input from '../../../../utils/input'
 import ApiFunction from '../../../../utils/api/apiFuntions'
 import { decryptData, encryptData } from '../../../../utils/api/encrypted'
 import { setUserData } from '../../../redux/loginForm'
+import debounce from 'debounce'
 
 const EditProfile = () => {
     const [loading, setLoading] = useState(false)
@@ -114,7 +115,7 @@ const EditProfile = () => {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleUpdate = async () => {
+    const handleUpdate = debounce(async () => {
         if (!validateForm()) {
             toast.error('Please fix the validation errors')
             return
@@ -166,7 +167,7 @@ const EditProfile = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, 300)
 
     return (
         <div className="space-y-6">

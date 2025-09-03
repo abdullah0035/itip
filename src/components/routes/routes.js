@@ -17,6 +17,9 @@ import Account from '../pages/dashboard/account'
 import { useAuth } from '../redux/auth/useAuth'
 import { useSelector } from 'react-redux'
 import Checkout from '../pages/home/checkout'
+import UserRoutes from '../redux/auth/userRoutes'
+import CustomerLogin from '../pages/customer/onboading/login'
+import CustomerSignup from '../pages/customer/signup'
 
 // Root redirect component
 const RootRedirect = () => {
@@ -49,6 +52,12 @@ const Routing = () => {
           <Route path='/verification' element={<VerificationCode />} />
           <Route path='/success' element={<SuccessScreen />} />
         </Route>
+
+        <Route element={<UserRoutes />}>
+        </Route>
+          <Route path='/customer-login' element={<CustomerLogin />} />
+          <Route path='/customer-signup' element={<CustomerSignup />} />
+
         <Route path="/tip/:qrToken" element={<Checkout />} />
 
         {/* Fallback route - redirects to appropriate page based on auth */}
