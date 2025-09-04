@@ -129,6 +129,17 @@ overflow: hidden;
   align-items: center !important;
   justify-content: center !important;
 }
-.nsm7Bb-HzV7m-LgbsSe-BPrWId{
+.nsm7Bb-HzV7m-LgbsSe-BPrWId,.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{
   max-width: min-content !important;
+}
+.S9gUrf-YoZ4jf, .S9gUrf-YoZ4jf *{
+  width: 100% !important;
+  left: 10px !important;
+}
+.qJTHM{
+left: 10px !important;
+position: relative !important;
+}
+.haAclf {
+  width: 97.5%;
 }
