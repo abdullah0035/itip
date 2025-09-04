@@ -1,35 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Logo } from '../../icons/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
-import ApiFunction from '../../../utils/api/apiFuntions'
 import { toast } from 'react-toastify'
+import ApiFunction from '../../utils/api/apiFuntions'
+import { Logo } from '../icons/icons'
 
-const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type }) => {
+const ForgotPasswordVerification = ({ email: propEmail, userType: propUserType }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { post } = ApiFunction()
   
-  // Get contact info from props, location state, or default
+  // Get data from props, location state, or default
   const email = propEmail || location.state?.email || ""
-  const phoneNumber = propPhoneNumber || location.state?.phoneNumber || ""
+  const userType = propUserType || location.state?.user_type || 'customer'
   
-  // Get type from props or location state
-  const verificationType = type || location.state?.type || 'email'
-  
-  // Debug logging to check what values we're getting
-  console.log('Verification Debug:', {
+  // Debug logging
+  console.log('Forgot Password Verification Debug:', {
     email,
-    phoneNumber,
-    verificationType,
+    userType,
     locationState: location.state
   });
   
-  // Determine the contact value to display and use
-  const contactValue = verificationType === 'phone' ? phoneNumber : email
-  
-  if(contactValue === ""){
-    navigate('/');
-  }
+  // Redirect if no email
+  useEffect(() => {
+    if (!email) {
+      navigate('/forgot-password');
+    }
+  }, [email, navigate])
   
   // Form state
   const [code, setCode] = useState(['', '', '', '', ''])
@@ -44,13 +40,6 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, 5)
   }, [])
-
-  // Check for valid contact info and redirect if needed - MOVED TO useEffect
-  useEffect(() => {
-    if(contactValue === ""){
-      navigate('/');
-    }
-  }, [contactValue, navigate])
 
   // Countdown timer for resend
   useEffect(() => {
@@ -137,7 +126,7 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
     }
   }
 
-  // Enhanced validation function
+  // Validate code
   const validateCode = () => {
     const enteredCode = code.join('')
     const newErrors = {}
@@ -150,24 +139,17 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
       newErrors.code = 'Code must contain only numbers'
     }
 
-    // Validate contact info as well
-    if (verificationType === 'phone') {
-      if (!phoneNumber || !phoneNumber.trim()) {
-        newErrors.contact = 'Phone number is required for verification'
-      }
-    } else {
-      if (!email || !email.trim()) {
-        newErrors.contact = 'Email is required for verification'
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-        newErrors.contact = 'Invalid email format'
-      }
+    if (!email || !email.trim()) {
+      newErrors.contact = 'Email is required for verification'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      newErrors.contact = 'Invalid email format'
     }
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  // Handle code submission with API integration
+  // Handle code verification
   const handleSubmit = async () => {
     if (!validateCode()) {
       return
@@ -175,93 +157,59 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
     
     const enteredCode = code.join('')
     
-    // Prepare payload based on verification type
-    let payload = {
+    // IMPORTANT: Make sure we're using the forgot password verification action
+    const payload = {
+      action: 'verifyResetCode', // NOT 'verifyCode' - this is for password reset
+      email: email.trim().toLowerCase(),
       code: enteredCode,
-      action: 'verifyCode'
+      user_type: userType
     }
     
-    if (verificationType === 'phone') {
-      payload.phoneNumber = phoneNumber.trim()
-      payload.type = 'phone'
-    } else {
-      payload.email = email.trim().toLowerCase()
-      payload.type = 'email'
-    }
+    console.log('Sending reset verification payload:', payload) // Debug log
     
     setIsLoading(true)
     
-    await post('', payload)
-      .then((res) => {
-        setIsLoading(false)
-        if (res?.status) {
-          // Success - navigate to signup
-          const successMessage = verificationType === 'phone' 
-            ? 'Phone number verified successfully!' 
-            : 'Email verified successfully!'
-          
-          toast.success(successMessage);
-          
-          const navigationState = {
+    try {
+      const res = await post('', payload)
+      
+      console.log('Reset verification response:', res) // Debug log
+      
+      if (res?.status === 'success') {
+        toast.success('Reset code verified successfully!')
+        
+        // Navigate to new password screen - NOT to login/signup
+        navigate('/new-password', { 
+          state: { 
+            email: email.trim().toLowerCase(),
+            user_type: userType,
             verified: true,
-            type: verificationType
-          }
-          
-          if (verificationType === 'phone') {
-            navigationState.phoneNumber = phoneNumber
-          } else {
-            navigationState.email = email
-          }
-          
-          navigate('/signup', { state: navigationState })
-        } else {
-          // Error from server
-          setErrors({ 
-            code: res?.message || 'Invalid verification code. Please try again.' 
-          })
-          // Clear the code on error
-          setCode(['', '', '', '', ''])
-          inputRefs.current[0]?.focus()
-        }
-      })
-      .catch((error) => {
-        setIsLoading(false)
-        console.error('Verification error:', error)
-        setErrors({
-          code: error.message || 'Verification failed. Please try again.'
+            from: 'forgot-password' // Add identifier
+          } 
+        })
+      } else {
+        setErrors({ 
+          code: res?.message || 'Invalid reset code. Please try again.' 
         })
         // Clear the code on error
         setCode(['', '', '', '', ''])
         inputRefs.current[0]?.focus()
+      }
+    } catch (error) {
+      console.error('Reset code verification error:', error)
+      setErrors({
+        code: error.message || 'Reset verification failed. Please try again.'
       })
+      setCode(['', '', '', '', ''])
+      inputRefs.current[0]?.focus()
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  // Handle resend code with API integration
+  // Handle resend code
   const handleResendCode = async () => {
     if (!canResend) return
     
-    // For phone verification, just reset the timer and code (static demo)
-    if (verificationType === 'phone') {
-      setResendTimer(60)
-      setCanResend(false)
-      setCode(['', '', '', '', ''])
-      
-      // Show success message briefly
-      setErrors({
-        success: 'Verification code resent! Use 12345 to verify.'
-      })
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setErrors({})
-      }, 3000)
-      
-      // Focus first input
-      inputRefs.current[0]?.focus()
-      return
-    }
-    
-    // For email verification, validate email before resending
     if (!email || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setErrors({
         resend: 'Invalid email address for resending code'
@@ -270,53 +218,53 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
     }
     
     const payload = {
+      action: 'forgotPassword',
       email: email.trim().toLowerCase(),
-      action: 'verificationCode'
+      user_type: userType
     }
     
     setIsLoading(true)
     clearErrors()
     
-    await post('', payload)
-      .then((res) => {
-        setIsLoading(false)
-        if (res?.status) {
-          // Success - reset timer and state
-          setResendTimer(60)
-          setCanResend(false)
-          setCode(['', '', '', '', ''])
-          
-          // Show success message briefly
-          setErrors({
-            success: res?.message || 'Verification code sent successfully!'
-          })
-          
-          // Clear success message after 3 seconds
-          setTimeout(() => {
-            setErrors({})
-          }, 3000)
-          
-          // Focus first input
-          inputRefs.current[0]?.focus()
-          
-        } else {
-          // Error from server
-          setErrors({
-            resend: res?.message || 'Failed to resend code. Please try again.'
-          })
-        }
-      })
-      .catch((error) => {
-        setIsLoading(false)
-        console.error('Resend error:', error)
+    try {
+      const res = await post('', payload)
+      
+      if (res?.status === 'success') {
+        // Success - reset timer and state
+        setResendTimer(60)
+        setCanResend(false)
+        setCode(['', '', '', '', ''])
+        
+        // Show success message briefly
         setErrors({
-          resend: error.message || 'Failed to resend code. Please try again.'
+          success: res?.message || 'Reset code sent successfully!'
         })
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setErrors({})
+        }, 3000)
+        
+        // Focus first input
+        inputRefs.current[0]?.focus()
+        
+      } else {
+        setErrors({
+          resend: res?.message || 'Failed to resend code. Please try again.'
+        })
+      }
+    } catch (error) {
+      console.error('Resend error:', error)
+      setErrors({
+        resend: error.message || 'Failed to resend code. Please try again.'
       })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const isCodeComplete = code.every(digit => digit !== '')
-  const displayContact = contactValue
+  const displayUserType = userType === 'service_worker' ? 'Service Worker' : 'Customer'
 
   return (
     <div className="flex flex-col">
@@ -329,16 +277,12 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
       <div className="flex-1 pt-8">
         <div className="w-full mx-auto">
           {/* Title */}
-          <h1 className="fs_40 text-start outfit_medium text-black">Enter 5-digit code</h1>
+          <h1 className="fs_40 text-start outfit_medium text-black">Enter Reset Code</h1>
           
           {/* Subtitle */}
           <p className="outfit fs_16 text-gray-600 mb-8 max-w-[450px]">
-            Enter 5-digit code we just texted to your {verificationType === 'phone' ? 'phone' : 'email'} {displayContact}
-            {verificationType === 'phone' && (
-              <span className="block text-sm text-gray-500 mt-1">
-                (Use 12345 for phone verification)
-              </span>
-            )}
+            We sent a 5-digit reset code to <strong>{email}</strong> for your {displayUserType} account. 
+            Enter the code below to reset your password.
           </p>
 
           {/* Code Input Boxes */}
@@ -398,7 +342,7 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
             </button>
           </div>
 
-          {/* Continue Button */}
+          {/* Verify Button */}
           <button
             onClick={handleSubmit}
             disabled={!isCodeComplete || isLoading}
@@ -408,12 +352,22 @@ const VerificationCode = ({ email: propEmail, phoneNumber: propPhoneNumber, type
                 : 'hover:bg-[var(--primary-dark)]'
             }`}
           >
-            {isLoading ? 'Verifying...' : 'Continue'}
+            {isLoading ? 'Verifying...' : 'Verify Code'}
           </button>
+
+          {/* Back to Forgot Password */}
+          <div className="text-center mt-6">
+            <button
+              onClick={() => navigate('/forgot-password')}
+              className="text-gray-500 fs_14 hover:text-gray-700 transition-colors"
+            >
+              Back to Forgot Password
+            </button>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-export default VerificationCode
+export default ForgotPasswordVerification

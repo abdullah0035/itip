@@ -12,10 +12,10 @@ import { encryptData } from '../../../utils/api/encrypted'
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  // const navigate = useNavigate();
   const login = useSelector(state => state.auth.isLogin);
   const { post } = ApiFunction();
   const dispatch = useDispatch();
+  
   // Form state
   const [formData, setFormData] = useState({
     email: '',
@@ -114,55 +114,59 @@ const Login = () => {
 
       <div className='mt-5 h-full'>
         <h1 className='fs_36 outfit_medium'>Login</h1>
-        <h2 className='outfit mb-5 fs_20'>Login to your account</h2>
+        <h2 className='outfit mb-5 fs_20'>Login to your Service Worker account</h2>
 
-        <form onSubmit={handleSubmit}>
-          <Input
-            labels='Email Address'
-            type='email'
-            placeholder='Enter your email'
-            icon=""
-            onChange={handleInputChange}
-            value={formData.email}
-            name="email"
-          />
-          {errors.email && (
-            <p className="text-red-500 fs_14 mt-1 mb-3">{errors?.email}</p>
-          )}
+        <Input
+          labels='Email Address'
+          type='email'
+          placeholder='Enter your email'
+          icon=""
+          onChange={handleInputChange}
+          value={formData.email}
+          name="email"
+        />
+        {errors.email && (
+          <p className="text-red-500 fs_14 mt-1 mb-3">{errors?.email}</p>
+        )}
 
-          <Input
-            labels='Password'
-            type='password'
-            placeholder='password'
-            icon={<RiEyeFill className='text-[var(--icon)] fs_16' />}
-            onChange={handleInputChange}
-            value={formData.password}
-            name="password"
-          />
-          {errors.password && (
-            <p className="text-red-500 fs_14 mt-1 mb-3">{errors?.password}</p>
-          )}
+        <Input
+          labels='Password'
+          type='password'
+          placeholder='password'
+          icon={<RiEyeFill className='text-[var(--icon)] fs_16' />}
+          onChange={handleInputChange}
+          value={formData.password}
+          name="password"
+        />
+        {errors.password && (
+          <p className="text-red-500 fs_14 mt-1 mb-3">{errors?.password}</p>
+        )}
 
-          <Link to='' className='float-right text-[var(--primary)] poppins_medium fs_14'>Forgot Password?</Link>
+        {/* Forgot Password Link */}
+        <Link 
+          to='/forgot-password' 
+          className='float-right text-[var(--primary)] poppins_medium fs_14 hover:text-[var(--primary-dark)] transition-colors'
+        >
+          Forgot Password?
+        </Link>
 
-          <span className='block poppins_medium fs_14 text-center mt-10'>
-            Already Registered as Customer?
-            <Link to={'/customer-login'} className='text-[var(--primary)] poppins_medium ms-1'>Login</Link>
-          </span>
+        {/* Login as Customer Link */}
+        <span className='block poppins_medium fs_14 text-center mt-14'>
+          Login as Customer?
+          <Link to={'/customer-login'} className='text-[var(--primary)] poppins_medium ms-1 hover:text-[var(--primary-dark)] transition-colors'>Login</Link>
+        </span>
+        
+        <button
+          onClick={handleSubmit}
+          className={`primary_btn mt-4 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={loading}
+        >
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
 
-          {/* Show auth error from hook or form submission error */}
-          <button
-            type="submit"
-            className={`primary_btn mt-4 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={loading}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-
-        <span className='block poppins_medium fs_14 text-center mt-10'>
+        <span className='block poppins_medium fs_14 text-center mt-5'>
           Don't Have an account?
-          <Link to={'/get-started'} className='text-[var(--primary)]'> Create New</Link>
+          <Link to={'/get-started'} className='text-[var(--primary)] hover:text-[var(--primary-dark)] transition-colors'> Create New</Link>
         </span>
       </div>
     </>

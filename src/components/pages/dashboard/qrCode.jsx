@@ -236,7 +236,7 @@ const QrCodeCard = ({
         <div className="bg-white rounded-md border border-[#F1F1F1] p-4 md:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 {/* QR Code Section */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 max-sm:mx-auto">
                     <div className="p-2 bg-white border rounded-lg shadow-sm">
                         {isGeneratingQR ? (
                             <div className="w-[60px] h-[60px] flex items-center justify-center bg-gray-100 rounded">
@@ -263,22 +263,22 @@ const QrCodeCard = ({
                     <div className="flex flex-col w-100 sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                         {/* Left Content */}
                         <div className="flex-1">
-                            <h3 className="fs_40 outfit_medium mb-2">
+                            <h3 className="fs_40 max-sm:text-center outfit_medium mb-2">
                                 {title}
                             </h3>
 
                             <div className="space-y-1 text-sm md:text-base text-gray-600">
-                                <div className="flex flex-row items-center gap-1 sm:gap-2">
+                                <div className="flex flex-row items-center max-sm:justify-center gap-1 sm:gap-2">
                                     <span className="fs_20 text-[var(--gray-400)]">Tip Type:</span>
                                     <span className='fs_20 text-[var(--gray-400)]'>{tipType}</span>
                                 </div>
 
-                                <div className="flex flex-row items-center gap-1 sm:gap-2">
+                                <div className="flex flex-row items-center max-sm:justify-center gap-1 sm:gap-2">
                                     <span className="fs_20 text-[var(--gray-400)]">Created On:</span>
                                     <span className='fs_20 text-[var(--gray-400)]'>{createdOn}</span>
                                 </div>
 
-                                <div className="flex flex-row items-center gap-1 sm:gap-2">
+                                <div className="flex flex-row items-center max-sm:justify-center gap-1 sm:gap-2">
                                     <span className="fs_20 text-[var(--gray-400)]">Total Tips Received:</span>
                                     <span className="fs_20 text-[var(--gray-400)]">{totalTipsReceived}</span>
                                 </div>
@@ -286,7 +286,7 @@ const QrCodeCard = ({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex-shrink-0 self-end flex items-center gap-2">
+                        <div className="flex-shrink-0 self-end flex items-center gap-2 flex-wrap max-sm:justify-center">
                             {/* Status Badge */}
                             <span className={`
                                 inline-flex items-center px-3 py-1 font-medium
@@ -496,7 +496,7 @@ const QrCode = () => {
     )
 
     const SkeletonLoader = () => (
-        <div className="bg-white sm:px-5 py-5 px-3 h_100vh rounded-lg">
+        <div className="bg-white sm:px-5 py-5 px-1 h_100vh rounded-lg">
             <div className="h-6 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
             <div className="h-4 bg-gray-200 rounded w-96 mb-4 animate-pulse"></div>
             <div className="flex items-center gap-2 mb-6">
@@ -517,7 +517,7 @@ const QrCode = () => {
 
     if (isLoading) {
         return (
-            <div className="p-6 space-y-6">
+            <div className="p-6 max-sm:p-3 space-y-4">
                 <div className='flex items-center justify-between'>
                     <h1 className="fs_32 outfit_medium text-[#2C2C2C]">QR Code</h1>
                 </div>
@@ -528,7 +528,7 @@ const QrCode = () => {
 
     if (error) {
         return (
-            <div className="p-6 space-y-6">
+            <div className="p-6 max-sm:p-3 space-y-6">
                 <h1 className="fs_32 outfit_medium text-[#2C2C2C]">QR Code</h1>
                 <div className="bg-white rounded-lg p-8 text-center">
                     <p className="text-red-500 mb-4">{error}</p>
@@ -544,7 +544,7 @@ const QrCode = () => {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 max-sm:p-3 space-y-4">
             {/* Dashboard Header */}
             <div className='flex items-center justify-between'>
                 <h1 className="fs_32 outfit_medium text-[#2C2C2C]">QR Code</h1>
@@ -577,7 +577,7 @@ const QrCode = () => {
                         <h2 className='fs_16 text-[var(--gray-400)]'>Manage your tip QR codes and track their performance</h2>
                         
                         {/* Filter Tabs */}
-                        <div className='flex items-center gap-2 mt-3'>
+                        <div className='flex items-center gap-2 mt-3 overflow-x-auto no_scroll'>
                             <button 
                                 className={`QrTabs w-min ${selectedType === 'all' ? 'active' : ''}`} 
                                 onClick={() => setSelectedType('all')}

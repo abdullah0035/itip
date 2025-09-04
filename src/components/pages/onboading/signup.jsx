@@ -12,26 +12,43 @@ import { encryptData } from '../../../utils/api/encrypted'
 import { setLogin, setLoginRedirect, setToken, setUserData } from '../../redux/loginForm'
 import { toast } from 'react-toastify'
 
-const Signup = ({ email: propEmail }) => {
+const Signup = ({ email: propEmail, phoneNumber: propPhoneNumber }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { post } = ApiFunction()
   const dispatch = useDispatch();
   
-  // Get email from props, location state, or default
+  // Get verification data from props or location state
   const verifiedEmail = propEmail || location.state?.email || ''
-  const isEmailVerified = location.state?.verified || false
+  const verifiedPhone = propPhoneNumber || location.state?.phoneNumber || ''
+  const verificationType = location.state?.type || 'email'
+  const isVerified = location.state?.verified || false
   
-  if(verifiedEmail === ""){
-    navigate('/');
-  }
+  // Debug logging
+  console.log('Signup Debug:', {
+    verifiedEmail,
+    verifiedPhone,
+    verificationType,
+    isVerified,
+    locationState: location.state
+  });
 
-  // Form state
+  // Check if we have verified contact info, redirect if not
+  const hasVerifiedContact = (verificationType === 'phone' && verifiedPhone) || 
+                            (verificationType === 'email' && verifiedEmail)
+  
+  useEffect(() => {
+    if (!hasVerifiedContact || !isVerified) {
+      navigate('/');
+    }
+  }, [hasVerifiedContact, isVerified, navigate])
+
+  // Form state - initialize with verified data
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: verifiedEmail,
-    phone: '',
+    email: verificationType === 'email' ? verifiedEmail : '',
+    phone: verificationType === 'phone' ? verifiedPhone : '',
     password: '',
     country: '',
     city: ''
@@ -47,15 +64,20 @@ const Signup = ({ email: propEmail }) => {
   // Loading state
   const [isLoading, setIsLoading] = useState(false)
 
-  // Set email when component mounts
+  // Set verified contact info when component mounts
   useEffect(() => {
-    if (verifiedEmail) {
+    if (verificationType === 'email' && verifiedEmail) {
       setFormData(prev => ({
         ...prev,
         email: verifiedEmail
       }))
+    } else if (verificationType === 'phone' && verifiedPhone) {
+      setFormData(prev => ({
+        ...prev,
+        phone: verifiedPhone
+      }))
     }
-  }, [verifiedEmail])
+  }, [verifiedEmail, verifiedPhone, verificationType])
 
   // Get user's current location on component mount
   useEffect(() => {
@@ -251,7 +273,7 @@ const Signup = ({ email: propEmail }) => {
       newErrors.lastName = 'Last name must be at least 2 characters'
     }
     
-    // Email validation
+    // Email validation - required regardless of verification type for account creation
     if (!formData.email.trim()) {
       newErrors.email = 'Email address is required'
     } else {
@@ -267,7 +289,7 @@ const Signup = ({ email: propEmail }) => {
       }
     }
     
-    // Phone validation
+    // Phone validation - required regardless of verification type for account creation
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required'
     } else {
@@ -326,6 +348,7 @@ const Signup = ({ email: propEmail }) => {
       password: formData.password,
       country: formData.country.trim(),
       city: formData.city.trim(),
+      verification_type: verificationType, // Include verification type
       action: 'createUser'
     }
     
@@ -344,7 +367,7 @@ const Signup = ({ email: propEmail }) => {
           toast.success('Account created successfully!');
           navigate('/success')
         } else {
-          toast.success("There is an create your account",res?.message);
+          toast.error(res?.message || "There was an error creating your account");
           setErrors({ 
             submit: res?.message || 'Failed to create account. Please try again.' 
           })
@@ -372,7 +395,18 @@ const Signup = ({ email: propEmail }) => {
 
       <div className='mt-5 h-full'>
         <h1 className='fs_36 outfit_medium'>Sign Up</h1>
-        <h2 className='outfit mb-10 fs_20'>Sign Up to your account</h2>
+        <h2 className='outfit mb-10 fs_20'>Complete your account setup</h2>
+        
+        {/* Verification Status Indicator */}
+        <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-700 fs_14 flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+            {verificationType === 'phone' ? 'Phone number' : 'Email address'} verified: {' '}
+            <span className="font-medium">
+              {verificationType === 'phone' ? verifiedPhone : verifiedEmail}
+            </span>
+          </p>
+        </div>
         
         <form onSubmit={handleSubmit}>
           {/* First Name and Last Name Row */}
@@ -416,13 +450,13 @@ const Signup = ({ email: propEmail }) => {
           <Input 
             labels='Email Address' 
             type='email' 
-            placeholder='Your Email Address' 
+            placeholder={verificationType === 'email' ? 'Verified Email Address' : 'Your Email Address'} 
             icon=""
             onChange={handleInputChange}
             value={formData.email}
             name="email"
-            disabled={isEmailVerified}
-            readonly={isEmailVerified}
+            disabled={verificationType === 'email'}
+            readonly={verificationType === 'email'}
           />
           {errors.email && (
             <p className="text-red-500 fs_14 mt-1 mb-3 flex items-center gap-2">
@@ -434,11 +468,13 @@ const Signup = ({ email: propEmail }) => {
           <Input 
             labels='Phone Number' 
             type='tel' 
-            placeholder='Your Phone Number' 
+            placeholder={verificationType === 'phone' ? 'Verified Phone Number' : 'Your Phone Number'} 
             icon=""
             onChange={handleInputChange}
             value={formData.phone}
             name="phone"
+            disabled={verificationType === 'phone'}
+            readonly={verificationType === 'phone'}
           />
           {errors.phone && (
             <p className="text-red-500 fs_14 mt-1 mb-3 flex items-center gap-2">
@@ -502,6 +538,14 @@ const Signup = ({ email: propEmail }) => {
               )}
             </div>
           </div>
+
+          {/* Submit Error Message */}
+          {errors.submit && (
+            <p className="text-red-500 fs_14 mt-1 mb-4 flex items-center gap-2">
+              {errors.submit}
+              <RiInformationFill className='w-[16px]' />
+            </p>
+          )}
 
           <button 
             type="submit"

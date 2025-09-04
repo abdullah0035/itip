@@ -34,6 +34,9 @@ export const authRoutes = [
   '/home',
   '/customer-login',
   '/customer-signup',
+  '/forgot-password',
+  '/forgot-password-verification',
+  '/new-password'
 ]
 
 // Routes where NO layout should be shown (clean layout)

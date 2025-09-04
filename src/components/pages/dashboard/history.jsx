@@ -185,7 +185,7 @@ const History = () => {
             selector: row => row?.status,
             center: true,
             cell: row => (
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
                     row?.status === 'Completed' 
                         ? 'bg-green-100 text-green-800'
                         : row?.status === 'Pending'

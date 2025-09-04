@@ -160,7 +160,7 @@ const Checkout = () => {
         try {
             const response = await post('', {
                 action: 'processTip',
-                customer_token: token ?? "",
+                customer_token  : token ?? "",
                 qr_token: qrToken,
                 name: formData.name.trim(),
                 profession: formData.profession.trim(),

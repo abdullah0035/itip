@@ -24,11 +24,15 @@ import CustomerSignup from '../pages/customer/onboading/signup'
 import CustomerDashboard from '../pages/customer/dashboard/customerDashboard'
 import CustomerHistory from '../pages/customer/dashboard/history'
 import CustomerAccount from '../pages/customer/dashboard/account'
+import ForgotPassword from '../pages/forgotPassword'
+import NewPassword from '../pages/newPassword'
+import ForgotPasswordVerification from '../pages/forgotPasswordVerification'
 
 // Root redirect component
 const RootRedirect = () => {
   const auth = useAuth()
-  const loginRedirect = useSelector(state => state.auth?.loginRedirect) ?? "/dashboard";
+  const loginRedirect =
+    useSelector(state => state.auth?.loginRedirect) ?? '/dashboard'
   return <Navigate to={auth ? loginRedirect : '/'} />
 }
 
@@ -71,8 +75,16 @@ const Routing = () => {
         </Route>
 
         {/* Public tip route - accessible to everyone */}
-        <Route path="/tip/:qrToken" element={<Checkout />} />
-
+        <Route path='/tip/:qrToken' element={<Checkout />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route
+          path='/forgot-password-verification'
+          element={<ForgotPasswordVerification type='forgot_password' />}
+        />
+        <Route
+          path='/new-password'
+          element={<NewPassword />}
+        />
         {/* Fallback route - redirects to appropriate page based on auth */}
         <Route path='*' element={<RootRedirect />} />
       </Routes>

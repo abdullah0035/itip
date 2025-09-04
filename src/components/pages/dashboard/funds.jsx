@@ -204,7 +204,7 @@ const Funds = () => {
             selector: row => row.status,
             center: true,
             cell: row => (
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
                     row.status === 'Completed' 
                         ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
@@ -264,15 +264,15 @@ const Funds = () => {
     };
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 max-sm:p-5 space-y-4">
             {/* Dashboard Header */}
-            <div className='flex items-center justify-between'>
+            <div className='hidden items-center justify-between sm:flex '>
                 <h1 className="fs_32 outfit_medium text-[#2C2C2C]">Funds</h1>
             </div>
 
             {/* Recent Tips Table */}
-            <div className={`bg-white sm:px-5 py-5 px-3 h_100vh rounded-lg`}>
-                <h1 className='fs_24 outfit_medium'>Funds</h1>
+            <div className={`bg-white sm:px-5 py-5 px-0 h_100vh rounded-lg`}>
+                <h1 className='sm:fs_24 fs_40 outfit_medium'>Funds</h1>
                 <h2 className='fs_16 text-[var(--gray-400)]'>Deposit funds into your wallet using one of your virtual cards</h2>
 
                 {/* Balance Cards */}
@@ -352,7 +352,7 @@ const Funds = () => {
                         </div>
 
                         {/* Payout Frequency */}
-                        <div className="flex items-center sm:gap-[100px] gap-[30px]">
+                        <div className="flex items-center max-sm:items-start max-sm:flex-col sm:gap-[100px] gap-[30px]">
                             <div className="flex items-center gap-3">
                                 <div className="relative">
                                     <input

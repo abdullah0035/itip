@@ -17,6 +17,7 @@ const GetStarted = () => {
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const { post } = ApiFunction();
+  
   // Handle method toggle
   const handleMethodToggle = (method) => {
     setContactMethod(method)
@@ -79,8 +80,6 @@ const GetStarted = () => {
     return Object.keys(newErrors).length === 0
   }
 
-
-
   // Handle form submission with API integration
   const handleSubmit = async (e) => {
     e?.preventDefault()
@@ -89,7 +88,9 @@ const GetStarted = () => {
     if (!validateInput()) {
       return
     }
+    
     let payload = {};
+    
     if (contactMethod === 'phone') {
       // ==============================================
       // PHONE NUMBER API INTEGRATION
@@ -98,7 +99,6 @@ const GetStarted = () => {
       payload = {
         phoneNumber: cleanedPhone,
       }
-
     } else {
       // ==============================================
       // EMAIL API INTEGRATION
@@ -108,7 +108,29 @@ const GetStarted = () => {
         action: 'verificationCode'
       }
     }
+    
     setIsLoading(true);
+    
+    if (contactMethod === 'phone') {
+      // For phone verification, skip API call and go directly to verification
+      setIsLoading(false);
+      
+      // Debug logging
+      console.log('Navigating with phone data:', {
+        phoneNumber: contactValue.trim(),
+        type: 'phone'
+      });
+      
+      navigate('/verification', { 
+        state: { 
+          phoneNumber: contactValue.trim(), // Pass phone number properly
+          type: 'phone' // Pass the verification type
+        } 
+      });
+      return;
+    }
+    
+    // Only make API call for email verification
     await post('', payload)
       .then((res) => {
         console.log(res);
@@ -116,23 +138,26 @@ const GetStarted = () => {
         if (res?.status) {
           navigate('/verification', { 
             state: { 
-              email: contactValue?.trim()?.toLowerCase()
+              email: contactValue?.trim()?.toLowerCase(),
+              type: 'email' // Pass the verification type
             } 
           });
         } else {
           if(res.message === 'Email is already Verified.'){
-        navigate('/signup', { 
-            state: { 
-              email: contactValue?.trim()?.toLowerCase(),
-              verified: true
-            } 
-          });
-          toast.warning('Email is already verified');
-          }else if(res.message === 'Account Already Created'){
+            navigate('/signup', { 
+              state: { 
+                email: contactValue?.trim()?.toLowerCase(),
+                verified: true,
+                type: 'email'
+              } 
+            });
+            toast.warning('Email is already verified');
+          } else if(res.message === 'Account Already Created'){
             toast.error('Account Already exists, Please Login');
             navigate('/');
-          }else{
-          console.log("the error from api is",res?.data?.message);
+          } else {
+            console.log("the error from api is", res?.data?.message);
+            setErrors({ submit: res?.message || 'An error occurred' });
           }
         }
       })
@@ -140,7 +165,6 @@ const GetStarted = () => {
         setIsLoading(false)
         setErrors({ submit: error.message || 'An error occurred' })
       })
-
   }
 
   const isValidInput = contactValue.trim().length > 0
@@ -204,10 +228,20 @@ const GetStarted = () => {
               <p className="text-red-500 fs_14 mt-1 mb-4 flex gap-[10px]">{errors?.contact}<RiInformationFill className='w-[16px] relative bottom-[2px]' /></p>
             )}
 
+            {/* Submit Error Message */}
+            {errors?.submit && (
+              <p className="text-red-500 fs_14 mt-1 mb-4 flex gap-[10px]">{errors?.submit}<RiInformationFill className='w-[16px] relative bottom-[2px]' /></p>
+            )}
+
             {/* Disclaimer Text */}
             <p className="text-gray-500 fs_14 mb-8 leading-relaxed">
               You will receive {contactMethod === 'phone' ? 'an SMS' : 'an email'} verification
               {contactMethod === 'phone' && ' that may apply message and data rates'}.
+              {contactMethod === 'phone' && (
+                <span className="block mt-1 text-xs text-blue-600">
+                  For demo purposes, use code 12345 to verify.
+                </span>
+              )}
             </p>
 
             {/* Continue Button */}
