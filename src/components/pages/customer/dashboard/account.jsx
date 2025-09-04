@@ -5,7 +5,6 @@ import {
     RiShieldCheckLine,
     RiLogoutBoxLine,
     RiEditLine,
-    RiUserSettingsLine
 } from '@remixicon/react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -64,12 +63,6 @@ const CustomerAccount = () => {
             onClick: handlePrivacyPolicy
         },
         {
-            title: "Account Management",
-            icon: RiUserSettingsLine,
-            isActive: activeComponent === 'account',
-            onClick: () => setActiveComponent('account')
-        },
-        {
             title: "Sign Out",
             icon: RiLogoutBoxLine,
             isActive: false, // Sign out should never appear active
@@ -86,8 +79,6 @@ const CustomerAccount = () => {
                 return 'Account > Change Password'
             case 'helpSupport':
                 return 'Account > Help & Support'
-            case 'account':
-                return 'Account > Account Management'
             default:
                 return 'Account'
         }

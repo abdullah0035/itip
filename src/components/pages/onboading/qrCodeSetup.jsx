@@ -3,12 +3,13 @@ import { Logo } from '../../icons/icons'
 import Input from '../../../utils/input'
 import RadioGroup from '../../../utils/radioGroup'
 import Textarea from '../../../utils/textarea'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { decryptData } from '../../../utils/api/encrypted'
 import ApiFunction from '../../../utils/api/apiFuntions'
 import { toast } from 'react-toastify'
 import { setLogout } from '../../redux/loginForm'
+import { RiInformationFill } from '@remixicon/react'
 
 const QRCodeSetup = ({ onGenerateQR }) => {
   const navigate = useNavigate()
@@ -201,11 +202,18 @@ const QRCodeSetup = ({ onGenerateQR }) => {
         
         let errorMessage = 'Failed to generate QR code. Please try again.'
         
-        // Handle specific error cases
-        if (error.message) {
-          errorMessage = error.message
-        } else if (error?.response?.data?.message) {
+        // FIXED: Check response data message FIRST before checking error.message
+        if (error?.response?.data?.message) {
           errorMessage = error?.response?.data?.message
+        } else if (error.message && !error.message.includes('Request failed with status code')) {
+          errorMessage = error.message
+        }
+        
+        // Handle specific error cases based on status codes
+        if (error?.response?.status === 405) {
+          errorMessage = 'Method not allowed. Please try again.'
+        } else if (error?.response?.status >= 500) {
+          errorMessage = 'Server error. Please try again later.'
         }
         
         setErrors({
@@ -215,7 +223,7 @@ const QRCodeSetup = ({ onGenerateQR }) => {
         
         // If unauthorized, redirect to login
         if (error?.response?.status === 403 || errorMessage?.includes('Unauthorized')) {
-          
+          dispatch(setLogout())
           navigate('/')
         }
       })
@@ -241,7 +249,7 @@ const QRCodeSetup = ({ onGenerateQR }) => {
         <div className="max-w-md mx-auto pb-8">
 
           {/* Title */}
-          <h1 className="fs_40 outfit_medium text-black mb-2">Setup your first QR Code</h1>
+          <h1 className="fs_40 outfit_medium text-black text-center mb-2">Setup your QR Code</h1>
 
           {/* Subtitle */}
           <p className="outfit fs_20 text-center text-gray-600">
@@ -320,7 +328,7 @@ const QRCodeSetup = ({ onGenerateQR }) => {
             
             {/* Submit Error */}
             {errors?.submit && (
-              <p className="text-red-500 fs_14 mb-4 text-center">{errors?.submit}</p>
+              <p className="text-red-500 fs_14 mb-4 text-center flex items-center gap-[13px]">{errors?.submit}</p>
             )}
 
             {/* Generate QR Code Button */}
@@ -335,13 +343,13 @@ const QRCodeSetup = ({ onGenerateQR }) => {
             >
               {isLoading ? 'Generating QR Code...' : 'Generate QR Code'}
             </button>
-            
-            {/* Authentication warning */}
-            {!token && (
-              <p className="text-orange-500 fs_12 mt-2 text-center">
-                Please ensure you're logged in to generate QR codes
-              </p>
-            )}
+            <Link to={'/dashboard'}>
+            <button
+              type="submit"
+              className={`primary_btn mt-2 w-full transition-all hover:bg-[var(--primary-dark)]`}>
+              BacK to App
+            </button>
+            </Link>
           </form>
         </div>
       </div>

@@ -81,7 +81,9 @@ const ChangePassword = () => {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleUpdate = async () => {
+    const handleUpdate = async (e) => {
+        e?.preventDefault()
+
         if (!validateForm()) {
             toast.error('Please fix the validation errors')
             return
@@ -92,8 +94,9 @@ const ChangePassword = () => {
             return
         }
 
+        // Create data object for API (following the same pattern as other components)
         const data = {
-            action: 'changeCustomerPassword', // Updated for customer API
+            action: 'changeCustomerPassword',
             token: token,
             old_password: passwordData.oldPassword,
             new_password: passwordData.newPassword,
@@ -103,39 +106,78 @@ const ChangePassword = () => {
         setLoading(true)
 
         try {
-            const response = await post('', data)
-            
-            if (response?.status === 'success') {
-                toast.success(response?.message || 'Password changed successfully')
-                
-                // Reset form after successful update
-                setPasswordData({
-                    oldPassword: '',
-                    newPassword: '',
-                    confirmPassword: ''
+            await post('', data)
+                .then(res => {
+                    console.log("Customer password change response:", res);
+                    
+                    if (res?.status === 'success') {
+                        toast.success(res?.message || 'Password changed successfully')
+                        
+                        // Reset form after successful update
+                        setPasswordData({
+                            oldPassword: '',
+                            newPassword: '',
+                            confirmPassword: ''
+                        })
+                        
+                        // Clear any existing errors
+                        setErrors({})
+                    } else {
+                        // Handle API error responses (same pattern as other components)
+                        if (res?.message) {
+                            // Handle specific error messages
+                            if (res.message.includes('Current password is incorrect')) {
+                                toast.error('Current password is incorrect')
+                                setErrors({ oldPassword: 'Current password is incorrect' })
+                            } else if (res.message.includes('Password cannot be changed for social login accounts')) {
+                                toast.error('Password cannot be changed for social login accounts (Google/Facebook)')
+                            } else {
+                                toast.error(res.message)
+                            }
+                        } else if (res?.errors && Array.isArray(res.errors)) {
+                            // Handle validation errors from API
+                            res.errors.forEach(error => {
+                                toast.error(error)
+                            })
+                        } else {
+                            toast.error('Failed to change password')
+                        }
+                    }
                 })
-                
-                // Clear any existing errors
-                setErrors({})
-            } else if (response?.message === 'Current password is incorrect') {
-                toast.error('Current password is incorrect')
-            } else if (response?.message === 'Password cannot be changed for social login accounts') {
-                toast.error('Password cannot be changed for social login accounts (Google/Facebook)')
-            } else {
-                if (response?.errors && Array.isArray(response.errors)) {
-                    // Handle validation errors from API
-                    response.errors.forEach(error => {
-                        toast.error(error)
-                    })
-                } else if (response?.message) {
-                    toast.error(response.message)
-                } else {
-                    toast.error('Failed to change password')
-                }
-            }
         } catch (error) {
             console.error('Customer password change error:', error)
-            toast.error('An error occurred. Please try again.')
+            
+            // Handle errors the same way as other components
+            let errorMessage = 'An error occurred. Please try again.'
+            
+            // Check for specific error messages from API response
+            if (error?.response?.data?.message) {
+                errorMessage = error?.response?.data?.message
+                
+                // Handle specific API error cases
+                if (errorMessage.includes('Current password is incorrect')) {
+                    setErrors({ oldPassword: 'Current password is incorrect' })
+                    toast.error('Current password is incorrect')
+                    return
+                } else if (errorMessage.includes('Password cannot be changed for social login accounts')) {
+                    toast.error('Password cannot be changed for social login accounts (Google/Facebook)')
+                    return
+                }
+            } else if (error.message && !error.message.includes('Request failed with status code')) {
+                errorMessage = error.message
+            }
+
+            // Handle HTTP status codes
+            if (error?.response?.status === 403) {
+                errorMessage = 'Unauthorized. Please login again.'
+            } else if (error?.response?.status >= 500) {
+                errorMessage = 'Server error. Please try again later.'
+            }
+
+            setErrors({
+                submit: errorMessage
+            })
+            toast.error(errorMessage)
         } finally {
             setLoading(false)
         }
@@ -200,6 +242,11 @@ const ChangePassword = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Submit Error Display */}
+                {errors.submit && (
+                    <p className="text-red-500 fs_14 mb-4 text-center">{errors.submit}</p>
+                )}
 
                 {/* Update Button */}
                 <div className="flex justify-end mt-8">

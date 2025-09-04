@@ -5,7 +5,6 @@ import Input from '../../../../utils/input'
 import ApiFunction from '../../../../utils/api/apiFuntions'
 import { decryptData, encryptData } from '../../../../utils/api/encrypted'
 import { setUserData } from '../../../redux/loginForm'
-import debounce from 'debounce'
 
 const EditProfile = () => {
     const [loading, setLoading] = useState(false)
@@ -13,14 +12,14 @@ const EditProfile = () => {
     const dispatch = useDispatch()
     const { post } = ApiFunction()
     
-    // Get user data from Redux store - Updated for customer
-    const encryptedUser = useSelector(state => state.auth?.userData)
+    // Get customer data from Redux store
+    const encryptedCustomer = useSelector(state => state.auth?.userData)
     const encryptedToken = useSelector(state => state.auth?.token)
     
     // MEMOIZE the decrypted data to prevent infinite re-renders
-    const userData = useMemo(() => {
-        return encryptedUser ? decryptData(encryptedUser) : null
-    }, [encryptedUser])
+    const customerData = useMemo(() => {
+        return encryptedCustomer ? decryptData(encryptedCustomer) : null
+    }, [encryptedCustomer])
     
     const token = useMemo(() => {
         return encryptedToken ? decryptData(encryptedToken) : null
@@ -35,21 +34,21 @@ const EditProfile = () => {
         city: ''
     })
 
-    // Update form data when userData changes
+    // Update form data when customerData changes
     useEffect(() => {
-        if (userData) {
+        if (customerData) {
             setFormData({
-                first_name: userData?.first_name || '',
-                last_name: userData?.last_name || '',
-                email: userData?.email || '',
-                phone: userData?.phone || '',
-                country: userData?.country || '',
-                city: userData?.city || ''
+                first_name: customerData?.first_name || '',
+                last_name: customerData?.last_name || '',
+                email: customerData?.email || '',
+                phone: customerData?.phone || '',
+                country: customerData?.country || '',
+                city: customerData?.city || ''
             })
         }
-    }, [userData])
+    }, [customerData])
 
-    // Fixed input change handler
+    // Handle input changes
     const handleInputChange = (value, fieldName) => {
         console.log('Input changed:', { value, fieldName })
         
@@ -65,6 +64,8 @@ const EditProfile = () => {
             stateField = 'country'
         } else if (stateField === 'city' || fieldName === 'City') {
             stateField = 'city'
+        } else if (stateField === 'phone_number' || fieldName === 'Phone Number') {
+            stateField = 'phone'
         }
         
         console.log('Mapped to state field:', stateField)
@@ -111,11 +112,18 @@ const EditProfile = () => {
             newErrors.city = 'City is required'
         }
 
+        // Phone validation (optional but if provided, must be valid)
+        if (formData.phone.trim() && formData.phone.trim().length < 10) {
+            newErrors.phone = 'Phone number must be at least 10 digits'
+        }
+
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
-    const handleUpdate = debounce(async () => {
+    const handleUpdate = async (e) => {
+        e?.preventDefault()
+
         if (!validateForm()) {
             toast.error('Please fix the validation errors')
             return
@@ -126,12 +134,13 @@ const EditProfile = () => {
             return
         }
 
-        // Create data object for API
+        // Create data object for API (following the same pattern as login)
         const dataToSend = {
             action: 'updateCustomerProfile',
             token: token,
             first_name: formData.first_name.trim(),
             last_name: formData.last_name.trim(),
+            phone: formData.phone.trim(),
             country: formData.country.trim(),
             city: formData.city.trim()
         }
@@ -139,36 +148,54 @@ const EditProfile = () => {
         setLoading(true)
 
         try {
-            const result = await post(dataToSend)
-            
-            if (result?.status === 'success') {
-                toast.success(result?.message || 'Profile updated successfully')
-                
-                // Update Redux store with new customer data
-                const updatedUserData = encryptData(result.customer_data)
-                dispatch(setUserData(updatedUserData))
-                
-                // Clear any existing errors
-                setErrors({})
-            } else {
-                if (result?.errors && Array.isArray(result.errors)) {
-                    // Handle validation errors from API
-                    result.errors.forEach(error => {
-                        toast.error(error)
-                    })
-                } else if (result?.message) {
-                    toast.error(result.message)
-                } else {
-                    toast.error('Failed to update profile')
-                }
-            }
+            await post('', dataToSend)
+                .then(res => {
+                    console.log("Customer profile update response:", res);
+                    
+                    if (res?.status === 'success') {
+                        toast.success(res?.message || 'Profile updated successfully')
+                        
+                        // Update Redux store with new customer data (same pattern as login)
+                        const updatedCustomerData = encryptData(res.customer_data)
+                        dispatch(setUserData(updatedCustomerData))
+                        
+                        // Clear any existing errors
+                        setErrors({})
+                    } else {
+                        // Handle API error response (same pattern as login)
+                        if (res?.errors && Array.isArray(res.errors)) {
+                            // Handle validation errors from API
+                            res.errors.forEach(error => {
+                                toast.error(error)
+                            })
+                        } else if (res?.message) {
+                            toast.error(res.message)
+                        } else {
+                            toast.error('Failed to update profile')
+                        }
+                    }
+                })
         } catch (error) {
             console.error('Profile update error:', error)
-            toast.error('An error occurred. Please try again.')
+            
+            // Handle errors the same way as login component
+            let errorMessage = 'An error occurred. Please try again.'
+            
+            // Check for specific error messages from API response
+            if (error?.response?.data?.message) {
+                errorMessage = error?.response?.data?.message
+            } else if (error.message && !error.message.includes('Request failed with status code')) {
+                errorMessage = error.message
+            }
+
+            setErrors({
+                submit: errorMessage
+            })
+            toast.error(errorMessage)
         } finally {
             setLoading(false)
         }
-    }, 300)
+    }
 
     return (
         <div className="space-y-6">
@@ -211,7 +238,7 @@ const EditProfile = () => {
                     </div>
                 </div>
 
-                {/* Email and Phone - Two Columns (Readonly) */}
+                {/* Email and Phone - Two Columns (Email is readonly for customers) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <Input
@@ -236,6 +263,9 @@ const EditProfile = () => {
                             value={formData.phone}
                             name="phone"
                         />
+                        {errors.phone && (
+                            <p className="text-red-500 fs_14 mt-1 mb-3">{errors.phone}</p>
+                        )}
                     </div>
                 </div>
 
@@ -270,6 +300,11 @@ const EditProfile = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Submit Error Display */}
+                {errors.submit && (
+                    <p className="text-red-500 fs_14 mb-4 text-center">{errors.submit}</p>
+                )}
 
                 {/* Update Button */}
                 <div className="flex justify-end mt-8">
