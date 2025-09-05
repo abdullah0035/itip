@@ -9,7 +9,6 @@ import { decryptData } from '../../../utils/api/encrypted'
 import ApiFunction from '../../../utils/api/apiFuntions'
 import { toast } from 'react-toastify'
 import { setLogout } from '../../redux/loginForm'
-import { RiInformationFill } from '@remixicon/react'
 
 const QRCodeSetup = ({ onGenerateQR }) => {
   const navigate = useNavigate()

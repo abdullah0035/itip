@@ -610,7 +610,7 @@ const QrCode = () => {
                                         createdOn={qrCode?.created_date || 'Unknown'}
                                         totalTipsReceived={qrCode?.total_tips_formatted || '$0'}
                                         status={formatStatus(qrCode?.status)}
-                                        qrString={qrCode?.qr_string || `http://localhost:3000/${qrCode?.qr_token}`}
+                                        qrString={qrCode?.qr_string || `https://itip-nine.vercel.app/${qrCode?.qr_token}`}
                                         qrData={qrCode}
                                         onDelete={handleDeleteQRCode}
                                         onPreview={handlePreviewQRCode}

@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 import ApiFunction from '../../../../utils/api/apiFuntions'
 import { decryptData } from '../../../../utils/api/encrypted'
 import { setLogout } from '../../../redux/loginForm'
-import { RiArrowDownLine, RiArrowUpLine, RiEyeLine, RiSearchLine } from '@remixicon/react'
+import { RiArrowDownLine, RiArrowUpLine, RiEyeLine, RiSearchLine, RiCloseLine, RiPrinterLine } from '@remixicon/react'
 
 const CustomerDashboard = () => {
     const navigate = useNavigate()
@@ -16,11 +16,16 @@ const CustomerDashboard = () => {
     // Get encrypted token from Redux store (assuming customer auth structure)
     const encryptedToken = useSelector(state => state.auth?.token)
     const token = decryptData(encryptedToken)
+
     // State management
     const [dashboardData, setDashboardData] = useState(null)
     const [recentTips, setRecentTips] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
+
+    // Modal state for receipt
+    const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false)
+    const [selectedTip, setSelectedTip] = useState(null)
 
     // Table state
     const [searchTerm, setSearchTerm] = useState('')
@@ -69,7 +74,7 @@ const CustomerDashboard = () => {
         } finally {
             setIsLoading(false)
         }
-    }// Dependencies for useCallback
+    }
 
     // Fetch data when component mounts or token changes
     useEffect(() => {
@@ -122,6 +127,32 @@ const CustomerDashboard = () => {
         setSortConfig({ key, direction })
     }
 
+    // Receipt modal functions
+    const openReceiptModal = (tip) => {
+        setSelectedTip(tip)
+        setIsReceiptModalOpen(true)
+    }
+
+    const closeReceiptModal = () => {
+        setIsReceiptModalOpen(false)
+        setSelectedTip(null)
+    }
+
+    const printReceipt = () => {
+        const printContent = document.getElementById('receipt-content').innerHTML
+        const originalContent = document.body.innerHTML
+        
+        document.body.innerHTML = `
+            <div style="padding: 20px; font-family: Arial, sans-serif;">
+                ${printContent}
+            </div>
+        `
+        
+        window.print()
+        document.body.innerHTML = originalContent
+        window.location.reload() // Reload to restore React functionality
+    }
+
     // Helper functions
     const getStatusBadge = (status) => {
         const baseClasses = "px-3 py-1 rounded-full text-xs font-medium"
@@ -145,10 +176,13 @@ const CustomerDashboard = () => {
         return 'text-red-600'
     }
 
-    const getActionButton = (action, status) => {
-        if (action === 'View Receipt' && status === 'Completed') {
+    const getActionButton = (tip, status) => {
+        if (status === 'Completed') {
             return (
-                <button className="px-3 py-1 text-xs bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors">
+                <button 
+                    onClick={() => openReceiptModal(tip)}
+                    className="px-3 py-1 text-xs bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors"
+                >
                     <RiEyeLine className="w-3 h-3 inline mr-1" />
                     View Receipt
                 </button>
@@ -164,6 +198,119 @@ const CustomerDashboard = () => {
         return sortConfig.direction === 'asc' ?
             <RiArrowUpLine className="w-4 h-4" /> :
             <RiArrowDownLine className="w-4 h-4" />
+    }
+
+    // Receipt Modal Component
+    const ReceiptModal = () => {
+        if (!isReceiptModalOpen || !selectedTip) return null
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
+                    {/* Modal Header - Fixed */}
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                        <h3 className="text-lg font-semibold text-gray-900">Receipt</h3>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={printReceipt}
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Print Receipt"
+                            >
+                                <RiPrinterLine className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={closeReceiptModal}
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <RiCloseLine className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Receipt Content - Scrollable with hidden scrollbar */}
+                    <div className="flex-1 overflow-y-auto scrollbar-hide" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
+                        <style jsx>{`
+                            .scrollbar-hide::-webkit-scrollbar {
+                                display: none;
+                            }
+                        `}</style>
+                        <div id="receipt-content" className="p-6">
+                            <div className="text-center mb-6">
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">Payment Receipt</h2>
+                                <p className="text-sm text-gray-600">Receipt #RCP-{selectedTip?.no || 'N/A'}</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Receipt Details */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-gray-600">Date:</span>
+                                        <span className="text-sm text-gray-900">{selectedTip?.date}</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-gray-600">Description:</span>
+                                        <span className="text-sm text-gray-900">{selectedTip?.description}</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-gray-600">Payment Method:</span>
+                                        <span className="text-sm text-gray-900">Digital Payment</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-gray-600">Transaction ID:</span>
+                                        <span className="text-sm text-gray-900">TXN-{selectedTip?.no}</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-medium text-gray-600">Status:</span>
+                                        <span className={getStatusBadge(selectedTip?.status)}>
+                                            {selectedTip?.status}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Amount Section */}
+                                <div className="bg-gray-50 rounded-lg p-4 mt-6">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-lg font-bold text-gray-900">Amount Paid:</span>
+                                        <span className={`text-xl font-bold ${getAmountClass(selectedTip?.amount)}`}>
+                                            {formatAmount(selectedTip?.amount)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Additional Info */}
+                                <div className="text-center pt-4 mt-6">
+                                    <p className="text-xs text-gray-500 mb-2">
+                                        Generated on {new Date().toLocaleDateString()}, {new Date().toLocaleTimeString()}
+                                    </p>
+                                    <p className="text-xs text-gray-400">Thank you for your generous tip!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modal Footer - Fixed */}
+                    <div className="p-4 border-t border-gray-200 flex justify-end gap-3 flex-shrink-0">
+                        <button
+                            onClick={closeReceiptModal}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        >
+                            Close
+                        </button>
+                        <button
+                            onClick={printReceipt}
+                            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <RiPrinterLine className="w-4 h-4" />
+                            Print Receipt
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     // Skeleton Loader Components
@@ -373,7 +520,7 @@ const CustomerDashboard = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {getActionButton(tip?.action, tip?.status)}
+                                        {getActionButton(tip, tip?.status)}
                                     </td>
                                 </tr>
                             )) : (
@@ -426,6 +573,9 @@ const CustomerDashboard = () => {
                     </div>
                 )}
             </div>
+
+            {/* Receipt Modal */}
+            <ReceiptModal />
         </div>
     )
 }

@@ -18,15 +18,15 @@ const Sidebar = ({
     <>
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 w-64 h-screen pt-5 transition-transform bg-[var(--primary)] border-r border-gray-200 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 pt-5 transition-transform bg-[var(--primary)] border-r border-gray-200 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } sm:translate-x-0`}
       >
-        <div className="h-full pb-4 overflow-hidden  bg-transparent">
-                      {/* Logo */}
-            <Link to="/" className="flex items-center justify-center pb-8 ms-2 w-full">
-              <img src={LogoWhite} width={80} alt="" />
-            </Link>
+        <div className="h-full pb-4 overflow-y-auto bg-transparent overflow-x-hidden">
+          {/* Logo */}
+          <Link to="/" className="flex items-center justify-center pb-8 ms-2 w-full">
+            <img src={LogoWhite} width={80} alt="" />
+          </Link>
           <ul className="space-y-2 font-medium">
             {sidebarItems?.map((item, index) => {
               const isActive = location.pathname === item?.href
