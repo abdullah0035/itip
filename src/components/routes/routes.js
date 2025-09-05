@@ -27,6 +27,8 @@ import CustomerAccount from '../pages/customer/dashboard/account'
 import ForgotPassword from '../pages/forgotPassword'
 import NewPassword from '../pages/newPassword'
 import ForgotPasswordVerification from '../pages/forgotPasswordVerification'
+import PaymentSuccess from '../pages/home/paymentSuccess'
+import PaymentFailed from '../pages/home/paymentFailed'
 
 // Root redirect component
 const RootRedirect = () => {
@@ -76,6 +78,8 @@ const Routing = () => {
 
         {/* Public tip route - accessible to everyone */}
         <Route path='/tip/:qrToken' element={<Checkout />} />
+        <Route path='/success/:id' element={<PaymentSuccess />} />
+        <Route path='/failed/:id' element={<PaymentFailed />} />
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route
           path='/forgot-password-verification'
