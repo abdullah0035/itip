@@ -3,35 +3,34 @@ import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import QRCode from 'qrcode'
 import ApiFunction from '../../../utils/api/apiFuntions'
-import { useParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import { decryptData } from '../../../utils/api/encrypted'
+import axios from 'axios'
 
 const Checkout = () => {
-    const {qrToken} = useParams();
+    const { qrToken } = useParams();
     // const qrToken = searchParams.get('qrToken');
 
     const { post } = ApiFunction()
-    
+
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [qrData, setQrData] = useState(null)
     const [qrCodeUrl, setQrCodeUrl] = useState('')
     const [errors, setErrors] = useState({})
 
-     const encryptedToken = useSelector(state => state?.auth?.token)
+    const encryptedToken = useSelector(state => state?.auth?.token)
     const token = decryptData(encryptedToken)
-    
+
     const [formData, setFormData] = useState({
         name: '',
         profession: '',
         amount: '',
         message: '',
         paymentMethod: 'card',
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardHolderName: ''
+        title: ''
+
     })
 
     // Generate QR code when qrData is available
@@ -61,7 +60,7 @@ const Checkout = () => {
     useEffect(() => {
         if (qrToken) {
             loadQRDetails()
-        }else{
+        } else {
             console.log("the qr-code token is", qrToken);
         }
     }, [qrToken])
@@ -107,85 +106,123 @@ const Checkout = () => {
     const validateForm = () => {
         const newErrors = {}
 
-        if (!formData.name.trim()) {
+        if (!formData?.name?.trim()) {
             newErrors.name = 'Name is required'
         }
 
-        if (!formData.profession.trim()) {
+        if (!formData?.profession?.trim()) {
             newErrors.profession = 'Profession is required'
         }
 
-        if (!formData.amount || parseFloat(formData.amount) <= 0) {
+        if (!formData?.amount || parseFloat(formData?.amount) <= 0) {
             newErrors.amount = 'Please enter a valid tip amount'
         }
 
-        if (!formData.message.trim()) {
+        if (!formData?.message?.trim()) {
             newErrors.message = 'Message is required'
         }
-
-        if (formData.paymentMethod === 'card') {
-            if (!formData.cardNumber.trim()) {
-                newErrors.cardNumber = 'Card number is required'
-            } else if (formData.cardNumber.replace(/\s/g, '').length < 16) {
-                newErrors.cardNumber = 'Please enter a valid card number'
-            }
-
-            if (!formData.expiryDate.trim()) {
-                newErrors.expiryDate = 'Expiry date is required'
-            }
-
-            if (!formData.cvv.trim()) {
-                newErrors.cvv = 'CVV is required'
-            }
-
-            if (!formData.cardHolderName.trim()) {
-                newErrors.cardHolderName = 'Cardholder name is required'
-            }
-        }
-
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (qrData?.title) {
+            formData['title'] = qrData?.title;
+        }
+    }, [qrData])
+
+  const handlePayment = async () => {
+    try {
+        const data = {
+            amount: parseFloat(formData?.amount),
+            currency: "AED",
+            payment_type: "one_time",
+            is_test: true,
+            success_url: "https://itip-nine.vercel.app/",
+            failure_url: "https://itip-nine.vercel.app/",
+            description: formData?.title
+        };
+
+        // Replace with your actual API endpoint URL
+        const response = await axios.post('https://portal.ivmsgroup.com/payment/create-invoice', data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-KEY':'test_api_key_123456789'
+                // Add any authentication headers if needed
+                // 'Authorization': `Bearer ${token}`
+            },
+            timeout: 10000 // 10 second timeout
+        });
+
+        if (response.data?.status === 'success') {
+            dispatch(response.data?.data);
+            if (response.data?.data?.payment_link) {
+                navigate(response.data?.data?.payment_link);
+            }
+        }
+
+    } catch (error) {
+        console.error('Payment error:', error);
+        
+        // Handle different types of errors
+        if (error.response) {
+            // Server responded with error status
+            console.error('Error response:', error.response.data);
+            console.error('Error status:', error.response.status);
+        } else if (error.request) {
+            // Network error
+            console.error('Network error:', error.request);
+        } else {
+            // Other error
+            console.error('Error:', error.message);
+        }
+        
+        // You can dispatch an error action or show user feedback here
+        // dispatch(setPaymentError(error.message));
+        
+    } finally {
+        // Any cleanup code goes here
+        console.log('Payment request completed');
+        // You can set loading states, etc.
+        // setIsLoading(false);
+    }
+};
+
     const handleSubmit = async (e) => {
         e.preventDefault()
-        
+
         if (!validateForm()) {
             toast.error('Please fill all required fields')
             return
         }
 
         setSubmitting(true)
-        
+
         try {
             const response = await post('', {
                 action: 'processTip',
-                customer_token  : token ?? "",
+                customer_token: token ?? "",
                 qr_token: qrToken,
-                name: formData.name.trim(),
-                profession: formData.profession.trim(),
-                amount: parseFloat(formData.amount),
-                message: formData.message.trim(),
-                payment_method: formData.paymentMethod,
-                card_no: formData.paymentMethod === 'card' ? 
-                    '**** **** **** ' + formData.cardNumber.slice(-4) : 
-                    formData.paymentMethod === 'google_pay' ? 'Google Pay Transaction' : 'Apple Pay Transaction'
+                name: formData?.name?.trim(),
+                profession: formData?.profession?.trim(),
+                amount: parseFloat(formData?.amount),
+                message: formData?.message?.trim(),
             })
 
             if (response?.status === 'success') {
-                toast.success('Thank you! Your tip has been sent successfully.')
+                handlePayment();
+                // toast.success('Thank you! Your tip has been sent successfully.')
                 // Reset form
-                setFormData({
-                    name: '',
-                    profession: '',
-                    amount: qrData?.tip_amount?.toString() || '',
-                    message: '',
-                    paymentMethod: 'card',
-                    cardNumber: '',
-                    expiryDate: '',
-                    cvv: '',
-                    cardHolderName: ''
-                })
+                // setFormData({
+                //     name: '',
+                //     profession: '',
+                //     amount: qrData?.tip_amount?.toString() || '',
+                //     message: '',
+                //     paymentMethod: 'card'
+                // })
                 setErrors({})
             } else {
                 toast.error(response?.message || 'Failed to process tip')
@@ -255,9 +292,9 @@ const Checkout = () => {
                     <div className="w-48 h-48 bg-white border-2 border-gray-200 rounded-lg flex items-center justify-center mb-4">
                         <div className="w-40 h-40 bg-black bg-opacity-10 rounded flex items-center justify-center">
                             {qrCodeUrl ? (
-                                <img 
-                                    src={qrCodeUrl} 
-                                    alt="QR Code" 
+                                <img
+                                    src={qrCodeUrl}
+                                    alt="QR Code"
                                     className="w-full h-full object-contain"
                                 />
                             ) : (
@@ -266,7 +303,7 @@ const Checkout = () => {
                         </div>
                     </div>
                     <h2 className="text-2xl font-bold text-gray-800 text-center mb-2">
-                        {qrData.title}
+                        {qrData?.title}
                     </h2>
                     <p className="text-gray-600 text-center">
                         {qrData.description || 'Leave a tip'}
@@ -343,132 +380,15 @@ const Checkout = () => {
                         {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
                     </div>
 
-                    {/* Payment Method */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                            Payment Method *
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                            <button
-                                type="button"
-                                onClick={() => handleInputChange('paymentMethod', 'card')}
-                                className={`p-3 border rounded-lg text-sm font-medium transition-all ${
-                                    formData.paymentMethod === 'card'
-                                        ? 'border-[#2C6B6F] bg-[#2C6B6F] text-white'
-                                        : 'border-gray-300 hover:border-gray-400'
-                                }`}
-                            >
-                                Card
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => handleInputChange('paymentMethod', 'google_pay')}
-                                className={`p-3 border rounded-lg text-sm font-medium transition-all ${
-                                    formData.paymentMethod === 'google_pay'
-                                        ? 'border-[#2C6B6F] bg-[#2C6B6F] text-white'
-                                        : 'border-gray-300 hover:border-gray-400'
-                                }`}
-                            >
-                                Google Pay
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => handleInputChange('paymentMethod', 'apple_pay')}
-                                className={`p-3 border rounded-lg text-sm font-medium transition-all ${
-                                    formData.paymentMethod === 'apple_pay'
-                                        ? 'border-[#2C6B6F] bg-[#2C6B6F] text-white'
-                                        : 'border-gray-300 hover:border-gray-400'
-                                }`}
-                            >
-                                Apple Pay
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Card Details - Only show if card is selected */}
-                    {formData.paymentMethod === 'card' && (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Card Number *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.cardNumber}
-                                    onChange={(e) => {
-                                        const value = e.target.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim()
-                                        if (value.replace(/\s/g, '').length <= 16) {
-                                            handleInputChange('cardNumber', value)
-                                        }
-                                    }}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C6B6F] focus:border-transparent outline-none transition-all"
-                                    placeholder="1234 5678 9012 3456"
-                                />
-                                {errors.cardNumber && <p className="text-red-500 text-sm mt-1">{errors.cardNumber}</p>}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Expiry Date *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.expiryDate}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2').substr(0, 5)
-                                            handleInputChange('expiryDate', value)
-                                        }}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C6B6F] focus:border-transparent outline-none transition-all"
-                                        placeholder="MM/YY"
-                                    />
-                                    {errors.expiryDate && <p className="text-red-500 text-sm mt-1">{errors.expiryDate}</p>}
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        CVV *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.cvv}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, '').substr(0, 4)
-                                            handleInputChange('cvv', value)
-                                        }}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C6B6F] focus:border-transparent outline-none transition-all"
-                                        placeholder="123"
-                                    />
-                                    {errors.cvv && <p className="text-red-500 text-sm mt-1">{errors.cvv}</p>}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Cardholder Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.cardHolderName}
-                                    onChange={(e) => handleInputChange('cardHolderName', e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C6B6F] focus:border-transparent outline-none transition-all"
-                                    placeholder="John Doe"
-                                />
-                                {errors.cardHolderName && <p className="text-red-500 text-sm mt-1">{errors.cardHolderName}</p>}
-                            </div>
-                        </div>
-                    )}
-
                     {/* Submit Button */}
                     <button
                         type="button"
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className={`w-full py-4 rounded-lg font-medium text-lg transition-all ${
-                            submitting
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-[#2C6B6F] text-white hover:bg-[#245559] active:transform active:scale-95'
-                        }`}
+                        className={`w-full py-4 rounded-lg font-medium text-lg transition-all ${submitting
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-[#2C6B6F] text-white hover:bg-[#245559] active:transform active:scale-95'
+                            }`}
                     >
                         {submitting ? 'Processing...' : `Send Tip $${formData.amount || '0.00'}`}
                     </button>
