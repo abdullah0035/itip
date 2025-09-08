@@ -286,7 +286,7 @@ const QrCodeCard = ({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex-shrink-0 self-end flex items-center gap-2 flex-wrap max-sm:justify-center">
+                        <div className="flex-shrink-0 max-sm:w-full self-end flex items-center gap-2 flex-wrap max-sm:justify-center">
                             {/* Status Badge */}
                             <span className={`
                                 inline-flex items-center px-3 py-1 font-medium

@@ -202,11 +202,11 @@ const Checkout = () => {
                 payment_type: "one_time",
                 is_test: true,
                 success_url: id
-                    ? `https://itip-nine.vercel.app/${id}`
+                    ? `https://itip-nine.vercel.app/success/${id}`
                     : "https://itip-nine.vercel.app/",
 
                 failure_url: id
-                    ? `https://itip-nine.vercel.app/${id}`
+                    ? `https://itip-nine.vercel.app/failed/${id}`
                     : "https://itip-nine.vercel.app/",
 
                 description: formData?.title
